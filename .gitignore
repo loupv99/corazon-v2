@@ -1,0 +1,6 @@
+data/*
+!data/README.md
+runs/
+__pycache__/
+*.pt
+*.npy

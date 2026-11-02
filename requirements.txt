@@ -1,0 +1,7 @@
+# Probado en local con: Python 3.12.4, torch 2.12.1 (CPU), numpy 2.4.6, opencv 4.13, pillow 12.2, pandas 3.0.3.
+# En Kaggle se usan las versiones ya instaladas en la imagen; registrar las reales al cerrar el proyecto.
+torch>=2.2
+numpy>=1.26
+opencv-python-headless>=4.8
+pillow>=10.0
+pandas>=2.0
