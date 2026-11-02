@@ -34,7 +34,7 @@ débiles, CC BY 4.0), SCR (contornos humanos, CC BY 4.0) y radiografías JSRT li
 
 ## Reproducir
 
-1. **Kaggle** (recomendado): subir este repo como dataset privado `corazon-v2-codigo`, abrir
+1. **Kaggle** (recomendado): abrir
    `notebooks/01_kaggle_datos_y_unet.ipynb`, seguir las instrucciones de la primera celda y "Save & Run All".
 2. **Local / Colab:** `pip install -r requirements.txt` y seguir `run_all.sh`.
 
