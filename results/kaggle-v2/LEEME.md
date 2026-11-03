@@ -56,5 +56,5 @@ Fuga de vista = AUC del puntaje para separar AP de PA entre placas sin cardiomeg
    vienen de informes y el umbral 0,50 no es la definición que usó cada radiólogo.
 4. Ambos métodos pierden en AP. En el ICT la causa es conocida (magnificación) y se corrige con la vista: la fuga baja
    a 0,49 y la especificidad en AP sube de 0,36 a 0,62. La ResNet entrenada solo con PA pierde 0,14 de AUC en AP.
-5. Grad-CAM ([E4_gradcam.csv](E4_gradcam.csv)): cuando la ResNet dice "positivo", la energía en el corazón es 4–6
-   veces su área, acierte o no; en los negativos correctos, 1,2–4. Falta el análisis fino.
+5. Grad-CAM ([E4_gradcam.csv](E4_gradcam.csv)): cuando la ResNet dice "positivo", la energía en el corazón es 4,3–6,4
+   veces su área, acierte o no; en los negativos correctos, 1,2–4,3 (rangos entre corridas y vistas). Falta el análisis fino.
