@@ -39,4 +39,10 @@ done
 # 4. Tablas: E1, E2, E3, E4
 python -m src.analisis --data "$DATA" --runs runs --out results
 
-# 5. E5–E6: pendientes (fotos con celular, cm)
+# 5. E5: fotos con celular. En Kaggle (notebook 03) se eligen las 100 placas; el resto corre en la laptop:
+python -m src.fotos seleccionar --subset "$DATA/subset.csv" --nih-root "$NIH_ROOT" --out e5_seleccion
+#   python -m src.fotos mostrar --sel e5_seleccion          (pantalla completa; se fotografía cada lámina)
+#   fotos en fotos/<celular>_<condicion>/, luego:
+#   python -m src.e5 --sel e5_seleccion --fotos fotos --runs runs --out results/e5
+
+# 6. E6: pendiente (cm)

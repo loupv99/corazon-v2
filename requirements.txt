@@ -7,3 +7,5 @@ numpy>=1.26
 opencv-python-headless>=4.8
 pillow>=10.0
 pandas>=2.0
+# opencv >= 4.7 trae cv2.aruco (E5). "src.fotos mostrar" abre una ventana: en la laptop usar opencv-python (con GUI,
+# probado 4.13), no la versión headless. Opcional: pillow-heif, solo si las fotos del iPhone quedan en HEIC.
