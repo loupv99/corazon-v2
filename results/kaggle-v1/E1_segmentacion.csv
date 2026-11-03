@@ -1,0 +1,4 @@
+run,gpu,min_entrenamiento,mejor_epoch,val_dice_medio,scr_dice_pulmon_der,scr_dice_pulmon_izq,scr_dice_corazon,scr_dice_medio,scr_n,scr_ICT_error_abs_medio,scr_ICT_no_medible
+E1a_debil_todas,Tesla T4,31.1,29,0.9589,0.9791,0.9686,0.9352,0.9609,147,0.0122,0
+E1b_debil_rca07,Tesla T4,30.5,29,0.9591,0.9791,0.9689,0.9375,0.9618,147,0.0119,0
+E1c_rca07_ft_scr,Tesla T4,0.6,1,0.9573,0.9792,0.9708,0.9392,0.9631,147,0.0113,0

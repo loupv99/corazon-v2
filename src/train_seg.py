@@ -7,8 +7,9 @@ Variantes de E1 (ver run_all.sh):
                           --epochs 30 --lr 2e-4
 
 Decisiones fijas (y por qué):
-  - el mejor epoch se elige con el Dice medio en la validación NIH (máscaras débiles RCA >= 0,7). El test dorado de
-    SCR (147 placas) y el test NIH no se miran hasta el final (lista de verificación del enunciado);
+  - el mejor epoch se elige con el Dice medio en la validación NIH (máscaras débiles RCA >= 0,7); en el ajuste con SCR,
+    con 20 de las 100 placas doradas de ajuste. El test dorado de SCR (147 placas) y el test NIH no se miran hasta el
+    final (lista de verificación del enunciado);
   - checkpoint en cada epoch (last.pt) y reanudación con --resume: en Kaggle una sesión puede cortarse;
   - al terminar se predicen las máscaras de TODO el subconjunto NIH y se calcula el ICT de cada placa (ict_unet.csv),
     que es la entrada del experimento E2 del día siguiente.
@@ -119,13 +120,17 @@ def main(argv=None):
 
     if args.train_source == "nih":
         ds_tr = SegDataset(nih_img, nih_msk, indices(subset, "train", args.masks), augment=True, seed=args.seed)
+        ds_va = SegDataset(nih_img, nih_msk, indices(subset, "val", "rca07")[: args.max_eval or None])
     else:
-        ds_tr = SegDataset(scr_img, scr_msk, [i for i, r in enumerate(scr_rows) if r["split"] == "finetune"],
-                           augment=True, seed=args.seed)
+        # Ajuste con contornos humanos: el mejor epoch se elige con 20 de las 100 placas doradas, NO con la validación
+        # débil de NIH. En la Version #1 de Kaggle se eligió con la débil y ganó siempre el epoch 1: al acercarse al
+        # estilo humano el modelo se aleja del de CheXmask, así que esa validación castiga justo lo que se busca.
+        ft = [i for i, r in enumerate(scr_rows) if r["split"] == "finetune"]
+        random.Random(args.seed).shuffle(ft)
+        ds_tr = SegDataset(scr_img, scr_msk, ft[20:], augment=True, seed=args.seed)
+        ds_va = SegDataset(scr_img, scr_msk, ft[:20])
     if args.max_train:
         ds_tr.idx = ds_tr.idx[: args.max_train]
-    val_idx = indices(subset, "val", "rca07")[: args.max_eval or None]
-    ds_va = SegDataset(nih_img, nih_msk, val_idx)
     ds_scr = SegDataset(scr_img, scr_msk, [i for i, r in enumerate(scr_rows) if r["split"] == "test"][: args.max_eval or None])
 
     g = torch.Generator().manual_seed(args.seed)
