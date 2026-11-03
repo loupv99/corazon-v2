@@ -1,0 +1,22 @@
+cola,tarea,ok,min
+unet,E1b_debil_rca07_s0,True,1.6
+unet,E1a_debil_todas_s0,True,1.3
+unet,E1c_rca07_ft_scr_s0,True,2.0
+resnet,E2_resnet_paap_s0,True,7.2
+resnet,gradcam E2_resnet_paap_s0,True,0.7
+resnet,E2_resnet_paap_s1,True,6.6
+resnet,gradcam E2_resnet_paap_s1,True,0.7
+resnet,E2_resnet_paap_s2,True,6.6
+resnet,gradcam E2_resnet_paap_s2,True,0.7
+resnet,E4_resnet_pa_s0,True,4.5
+resnet,gradcam E4_resnet_pa_s0,True,0.7
+resnet,E4_resnet_pa_s1,True,4.6
+resnet,gradcam E4_resnet_pa_s1,True,0.7
+resnet,E4_resnet_pa_s2,True,4.5
+resnet,gradcam E4_resnet_pa_s2,True,0.7
+unet,E1b_debil_rca07_s1,True,35.4
+unet,E1c_rca07_ft_scr_s1,True,1.9
+unet,E1b_debil_rca07_s2,True,35.1
+unet,E1c_rca07_ft_scr_s2,True,1.9
+unet,E1a_debil_todas_s1,True,35.7
+unet,E1a_debil_todas_s2,True,35.7

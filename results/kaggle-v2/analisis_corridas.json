@@ -1,0 +1,24 @@
+{
+  "metodos": {
+    "ICT_unet": [
+      0,
+      1,
+      2
+    ],
+    "ICT_unet_ft": [
+      0,
+      1,
+      2
+    ],
+    "ResNet_PA+AP": [
+      0,
+      1,
+      2
+    ],
+    "ResNet_soloPA": [
+      0,
+      1,
+      2
+    ]
+  }
+}
