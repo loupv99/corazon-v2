@@ -91,10 +91,11 @@ def lamina(img: np.ndarray, k: int, texto: str = "") -> np.ndarray:
     return L
 
 
-def mostrar(sel: str, desde: int = 0):
+def mostrar(sel: str, desde: int = 0, x: int = 0, y: int = 0):
     filas = leer_seleccion(sel)
     ventana = "E5 - espacio: siguiente | b: anterior | q: salir"
     cv2.namedWindow(ventana, cv2.WINDOW_NORMAL)
+    cv2.moveWindow(ventana, x, y)   # con dos monitores: x, y = esquina del monitor elegido (la ventana a pantalla completa no se arrastra)
     cv2.setWindowProperty(ventana, cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
     k = desde
     while 0 <= k < len(filas):
@@ -187,6 +188,8 @@ def main(argv=None):
     a = sub.add_parser("mostrar")
     a.add_argument("--sel", required=True)
     a.add_argument("--desde", type=int, default=0, help="número de placa para retomar una sesión cortada")
+    a.add_argument("--x", type=int, default=0, help="esquina izquierda del monitor donde abrir (p. ej. 1920 = segundo monitor)")
+    a.add_argument("--y", type=int, default=0)
     a = sub.add_parser("probar")
     a.add_argument("--sel", required=True)
     a.add_argument("--foto", required=True)
@@ -194,7 +197,7 @@ def main(argv=None):
     if args.cmd == "seleccionar":
         seleccionar(args.subset, args.nih_root, args.out, args.n_por_grupo)
     elif args.cmd == "mostrar":
-        mostrar(args.sel, args.desde)
+        mostrar(args.sel, args.desde, args.x, args.y)
     else:
         foto = leer_foto(args.foto)
         if foto is None:
