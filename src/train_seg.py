@@ -144,6 +144,9 @@ def main(argv=None):
     scaler = torch.amp.GradScaler("cuda", enabled=device == "cuda")
 
     ep0, hist, best, t_train = 1, [], -1.0, 0.0
+    if args.epochs == 0 and not os.path.exists(os.path.join(out_dir, "best.pt")):
+        # --epochs 0 = solo evaluar un best.pt ya entrenado (p. ej. el de la Version #1 de Kaggle) copiado en out_dir
+        raise SystemExit(f"--epochs 0 necesita {out_dir}/best.pt")
     if args.resume and os.path.exists(args.resume):
         ck = torch.load(args.resume, map_location=device)
         if ck["epochs"] != args.epochs:
@@ -198,10 +201,14 @@ def main(argv=None):
     model.load_state_dict(torch.load(os.path.join(out_dir, "best.pt"), map_location=device)["model"])
     res_scr, pred_scr = evaluar(model, ds_scr, device)
     err = []
-    for k, i in enumerate(ds_scr.idx):
-        ict_pred = ctr.medir(pred_scr[k])["ICT"]
-        ict_hum = float(scr_rows[i]["ICT_humano"])
-        err.append(abs(ict_pred - ict_hum))
+    with open(os.path.join(out_dir, "ict_scr.csv"), "w", newline="") as f:   # por placa: entrada de E3
+        w = csv.writer(f)
+        w.writerow(["id", "ICT_humano", "ICT_unet"])
+        for k, i in enumerate(ds_scr.idx):
+            ict_pred = ctr.medir(pred_scr[k])["ICT"]
+            ict_hum = float(scr_rows[i]["ICT_humano"])
+            err.append(abs(ict_pred - ict_hum))
+            w.writerow([scr_rows[i]["id"], ict_hum, ict_pred])
     res_scr["ICT_error_abs_medio"] = float(np.nanmean(err)) if err else float("nan")
     res_scr["ICT_no_medible"] = int(np.isnan(err).sum()) if err else 0
 

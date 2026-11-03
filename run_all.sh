@@ -19,10 +19,24 @@ mkdir -p "$RAW"
 python -m src.prepare_data --nih-csv "$NIH_CSV" --nih-root "$NIH_ROOT" --test-list "$TEST_LIST" \
   --chexmask "$RAW/ChestX-Ray8.csv" --scr-points "$RAW/points.zip" --scr-images "$JSRT_DIR" --out "$DATA"
 
-# 2. E1: etiquetas débiles vs. doradas
-python -m src.train_seg --data "$DATA" --run E1b_debil_rca07 --masks rca07 --epochs 30
-python -m src.train_seg --data "$DATA" --run E1a_debil_todas --masks all --epochs 30
-python -m src.train_seg --data "$DATA" --run E1c_rca07_ft_scr --train-source scr \
-  --init runs/E1b_debil_rca07/best.pt --epochs 30 --lr 2e-4 --bs 8
+# 2. E1 (y E3): etiquetas débiles vs. doradas, 3 semillas
+for s in 0 1 2; do
+  python -m src.train_seg --data "$DATA" --run E1b_debil_rca07_s$s --masks rca07 --epochs 30 --seed $s
+  python -m src.train_seg --data "$DATA" --run E1a_debil_todas_s$s --masks all --epochs 30 --seed $s
+  python -m src.train_seg --data "$DATA" --run E1c_rca07_ft_scr_s$s --train-source scr \
+    --init runs/E1b_debil_rca07_s$s/best.pt --epochs 30 --lr 2e-4 --bs 8 --seed $s
+done
 
-# 3. E2–E6: pendientes (clasificador ResNet-50, Grad-CAM, fotos con celular)
+# 3. E2 y E4: ResNet-50 (PA + AP y solo PA) y Grad-CAM, 3 semillas
+for s in 0 1 2; do
+  python -m src.classifier --data "$DATA" --run E2_resnet_paap_s$s --seed $s
+  python -m src.classifier --data "$DATA" --run E4_resnet_pa_s$s --views PA --seed $s
+  for r in E2_resnet_paap_s$s E4_resnet_pa_s$s; do
+    python -m src.gradcam --data "$DATA" --ckpt runs/$r/best.pt --out runs/$r
+  done
+done
+
+# 4. Tablas: E1, E2, E3, E4
+python -m src.analisis --data "$DATA" --runs runs --out results
+
+# 5. E5–E6: pendientes (fotos con celular, cm)

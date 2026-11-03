@@ -41,6 +41,8 @@ def medir(masks: np.ndarray, mm_por_px: float | None = None) -> dict:
     der = np.array([np.where(pi[r])[0].max() for r in filas])
     j = int(np.argmax(der - izq))
     id_px = float(der[j] - izq[j])
+    if id_px <= 0:   # pulmones cruzados o tocándose en un solo píxel: segmentación degenerada, no se mide
+        return nan
     medio = (der[j] + izq[j]) / 2.0
 
     cols = np.where(cor.any(0))[0]
