@@ -6,7 +6,7 @@ Una U-Net segmenta pulmones y corazón en la radiografía de tórax y, con esos 
 cardiotorácico (ICT). Se compara con una CNN de caja negra (ResNet-50) para detectar cardiomegalia, usando etiquetas
 débiles (CheXmask) y doradas (SCR), y se mide la robustez a la proyección AP y a fotos tomadas con celular.
 
-**Estado (2026-11-02):** día 1 corrido en Kaggle ([results/kaggle-v1/](results/kaggle-v1/LEEME.md)). Día 2 listo
+**Estado (2026-11-03):** día 1 corrido en Kaggle ([results/kaggle-v1/](results/kaggle-v1/LEEME.md)). Día 2
 corrido (notebook 02, [results/kaggle-v2/](results/kaggle-v2/LEEME.md)): E1–E4 con 3 semillas. E5 (fotos con celular):
 código listo, falta la sesión de fotos. E6 (cm) y app: pendientes.
 
