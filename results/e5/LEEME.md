@@ -8,7 +8,7 @@ E1b (ICT, umbral 0,50) y de la ResNet-50 PA + AP (umbral de Youden de su validac
 |---|---|---|---|---|
 | iPhone 16 Pro | de frente | 100/100 | 100 | 81 / 15 / 4 |
 | iPhone 16 Pro | inclinada | 100/100 | 100 | 81 / 18 / 1 |
-| Honor (modelo POR CONFIRMAR) | de frente | 101/101 | 100 | 74 / 25 / 2 |
+| Honor X8b (LLY-LX3) | de frente | 101/101 | 100 | 74 / 25 / 2 |
 
 En el Honor la placa 64 se fotografió dos veces; vale la última. Las fotos del iPhone se tomaron con ProRAW activo y
 se usó el JPG que el teléfono genera; la asignación foto → placa y frente/inclinada está en `asignacion_iphone.csv`
