@@ -91,19 +91,21 @@ def lamina(img: np.ndarray, k: int, texto: str = "") -> np.ndarray:
     return L
 
 
-def mostrar(sel: str, desde: int = 0, x: int = 0, y: int = 0):
+def mostrar(sel: str, desde: int = 0, x: int = 0, y: int = 0, solo: list[int] | None = None):
     filas = leer_seleccion(sel)
+    orden = [n - 1 for n in solo] if solo else list(range(len(filas)))   # solo: números de lámina (1..100) a repetir
     ventana = "E5 - espacio: siguiente | b: anterior | q: salir"
     cv2.namedWindow(ventana, cv2.WINDOW_NORMAL)
     cv2.moveWindow(ventana, x, y)   # con dos monitores: x, y = esquina del monitor elegido (la ventana a pantalla completa no se arrastra)
     cv2.setWindowProperty(ventana, cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
-    k = desde
-    while 0 <= k < len(filas):
+    p = orden.index(desde) if desde in orden else 0
+    while 0 <= p < len(orden):
+        k = orden[p]
         cv2.imshow(ventana, lamina(original(sel, filas[k]), k, f"{k + 1}/{len(filas)}"))
         t = cv2.waitKey(0) & 0xFF
         if t in (ord("q"), 27):
             break
-        k = max(k - 1, 0) if t == ord("b") else k + 1
+        p = max(p - 1, 0) if t == ord("b") else p + 1
     cv2.destroyAllWindows()
     print(f"última placa mostrada: {k}")
 
@@ -190,6 +192,7 @@ def main(argv=None):
     a.add_argument("--desde", type=int, default=0, help="número de placa para retomar una sesión cortada")
     a.add_argument("--x", type=int, default=0, help="esquina izquierda del monitor donde abrir (p. ej. 1920 = segundo monitor)")
     a.add_argument("--y", type=int, default=0)
+    a.add_argument("--solo", type=lambda s: [int(n) for n in s.split(",")], help="solo estas láminas, p. ej. 8,20,21")
     a = sub.add_parser("probar")
     a.add_argument("--sel", required=True)
     a.add_argument("--foto", required=True)
@@ -197,7 +200,7 @@ def main(argv=None):
     if args.cmd == "seleccionar":
         seleccionar(args.subset, args.nih_root, args.out, args.n_por_grupo)
     elif args.cmd == "mostrar":
-        mostrar(args.sel, args.desde, args.x, args.y)
+        mostrar(args.sel, args.desde, args.x, args.y, args.solo)
     else:
         foto = leer_foto(args.foto)
         if foto is None:
