@@ -43,6 +43,6 @@ python -m src.analisis --data "$DATA" --runs runs --out results
 python -m src.fotos seleccionar --subset "$DATA/subset.csv" --nih-root "$NIH_ROOT" --out e5_seleccion
 #   python -m src.fotos mostrar --sel e5_seleccion          (pantalla completa; se fotografía cada lámina)
 #   fotos en fotos/<celular>_<condicion>/, luego:
-#   python -m src.e5 --sel e5_seleccion --fotos fotos --runs runs --out results/e5
+#   python -m src.e5 --sel e5_seleccion --fotos fotos --runs runs --out results/e5   (--solo-tablas: rehace tablas)
 
 # 6. E6: pendiente (cm)

@@ -123,6 +123,25 @@ def resumir(df: pd.DataFrame, runs: str, resnet_pat: str) -> pd.DataFrame:
     return pd.DataFrame(filas)
 
 
+def pareado(df: pd.DataFrame, runs: str, resnet_pat: str) -> pd.DataFrame:
+    """Corregida vs. sin corregir sobre las MISMAS placas: "sin corregir" solo existe cuando se vieron las 4 marcas."""
+    partes = []
+    for c in sorted(df.condicion.unique()):
+        if not c.endswith("_sin_corregir"):
+            continue
+        base = c[: -len("_sin_corregir")]
+        ks = set(df[df.condicion == c].k)
+        sub = df[df.condicion.isin(["original", base, c]) & df.k.isin(ks)]
+        partes.append(resumir(sub, runs, resnet_pat).assign(fotos=base))
+    return pd.concat(partes) if partes else pd.DataFrame()
+
+
+def tabla(det: pd.DataFrame, por: list[str]) -> pd.DataFrame:
+    num = ["n", "no_medibles", "delta_abs_media", "delta_abs_mediana", "sesgo", "cambia_decision", "auc"]
+    g = det.groupby(por)[num]
+    return g.mean().round(4).astype(str) + " ± " + g.std().fillna(0).round(4).astype(str)
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser()
     ap.add_argument("--sel", required=True, help="carpeta de src.fotos seleccionar (seleccion.csv + png/)")
@@ -131,28 +150,36 @@ def main(argv=None):
     ap.add_argument("--out", default="results/e5")
     ap.add_argument("--unet", default="E1b_debil_rca07")
     ap.add_argument("--resnet", default="E2_resnet_paap")
+    ap.add_argument("--solo-tablas", action="store_true", help="rehace las tablas desde E5_por_placa.csv, sin inferir")
     args = ap.parse_args(argv)
     os.makedirs(args.out, exist_ok=True)
     torch.set_num_threads(max(1, os.cpu_count() - 1))
 
-    cond, log = entradas(args.sel, args.fotos)
-    if len(log):
-        log.to_csv(os.path.join(args.out, "E5_fotos_leidas.csv"), index=False)
-        print(log.groupby("condicion").ok.agg(["sum", "size"]).rename(columns={"sum": "leidas", "size": "fotos"}))
-        for c, g in log[~log.ok].groupby("condicion"):
-            print(f"  {c}: no leídas -> {', '.join(g.archivo + ' (' + g.motivo + ')')}")
-    print({c: len(v) for c, v in cond.items()})
-    filas = fotos.leer_seleccion(args.sel)
-    df = inferir(cond, filas, args.runs, args.unet, args.resnet)
-    df.to_csv(os.path.join(args.out, "E5_por_placa.csv"), index=False)
+    placa = os.path.join(args.out, "E5_por_placa.csv")
+    if args.solo_tablas:
+        df = pd.read_csv(placa)
+    else:
+        cond, log = entradas(args.sel, args.fotos)
+        if len(log):
+            log.to_csv(os.path.join(args.out, "E5_fotos_leidas.csv"), index=False)
+            print(log.groupby("condicion").ok.agg(["sum", "size"]).rename(columns={"sum": "leidas", "size": "fotos"}))
+            for c, g in log[~log.ok].groupby("condicion"):
+                print(f"  {c}: no leídas -> {', '.join(g.archivo + ' (' + g.motivo + ')')}")
+        print({c: len(v) for c, v in cond.items()})
+        df = inferir(cond, fotos.leer_seleccion(args.sel), args.runs, args.unet, args.resnet)
+        df.to_csv(placa, index=False)
     det = resumir(df, args.runs, args.resnet)
     det.to_csv(os.path.join(args.out, "E5_por_semilla.csv"), index=False)
-    num = ["n", "no_medibles", "delta_abs_media", "delta_abs_mediana", "sesgo", "cambia_decision", "auc"]
-    g = det.groupby(["modelo", "condicion"])[num]
-    t = g.mean().round(4).astype(str) + " ± " + g.std().fillna(0).round(4).astype(str)
+    t = tabla(det, ["modelo", "condicion"])
     t.to_csv(os.path.join(args.out, "E5_resumen.csv"))
+    par = pareado(df, args.runs, args.resnet)
     pd.set_option("display.width", 250)
     print(t.to_string())
+    if len(par):
+        tp = tabla(par, ["fotos", "modelo", "condicion"])
+        tp.to_csv(os.path.join(args.out, "E5_pareado_sin_corregir.csv"))
+        print("\nCorregida vs. sin corregir, mismas placas (las que tienen las 4 marcas):")
+        print(tp.to_string())
 
 
 if __name__ == "__main__":

@@ -8,7 +8,7 @@ débiles (CheXmask) y doradas (SCR), y se mide la robustez a la proyección AP y
 
 **Estado (2026-11-03):** día 1 corrido en Kaggle ([results/kaggle-v1/](results/kaggle-v1/LEEME.md)). Día 2
 corrido (notebook 02, [results/kaggle-v2/](results/kaggle-v2/LEEME.md)): E1–E4 con 3 semillas. E5 (fotos con celular):
-código listo, falta la sesión de fotos. E6 (cm) y app: pendientes.
+300 fotos de 100 placas con 2 celulares ([results/e5/](results/e5/LEEME.md)). E6 (cm) y app: pendientes.
 
 ## Estructura
 
