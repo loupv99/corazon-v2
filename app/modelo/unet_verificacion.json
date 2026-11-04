@@ -1,0 +1,9 @@
+{
+ "corrida": "E1b_debil_rca07_s1",
+ "onnx": "unet.onnx",
+ "mb": 31.0,
+ "max_dif_prob": 2.5033950805664062e-06,
+ "pixeles_iguales": 1.0,
+ "ICT_pytorch": 0.5219298245614035,
+ "ICT_onnx": 0.5219298245614035
+}

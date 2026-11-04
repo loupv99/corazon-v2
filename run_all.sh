@@ -45,4 +45,9 @@ python -m src.fotos seleccionar --subset "$DATA/subset.csv" --nih-root "$NIH_ROO
 #   fotos en fotos/<celular>_<condicion>/, luego:
 #   python -m src.e5 --sel e5_seleccion --fotos fotos --runs runs --out results/e5   (--solo-tablas: rehace tablas)
 
-# 6. E6: pendiente (cm)
+# 6. E6: el lado derecho del ICT (lee los ict_unet.csv de E1b; sin GPU)
+python -m src.e6 --runs runs --out results/e6
+
+# 7. App: U-Net -> ONNX (semilla elegida por Dice de validación). Probar con: cd app && python -m http.server 8000
+python -m src.exportar_onnx --ckpt runs/E1b_debil_rca07_s1/best.pt --out app/modelo/unet.onnx \
+  --png app/ejemplos/con_cardiomegalia.png
