@@ -4,3 +4,11 @@ runs/
 __pycache__/
 *.pt
 *.npy
+
+paper/*.aux
+paper/*.log
+paper/*.bbl
+paper/*.blg
+paper/*.out
+paper/*.fls
+paper/*.fdb_latexmk
