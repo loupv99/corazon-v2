@@ -11,8 +11,8 @@
 \usepackage{xcolor}
 \usepackage{tikz}
 \usetikzlibrary{positioning,arrows.meta}
+\usepackage{xurl}
 \usepackage[hidelinks]{hyperref}
-\newcommand{\pendiente}[1]{\textcolor{red}{[PENDIENTE: #1]}}
 \renewcommand{\IEEEkeywordsname}{Palabras clave}
 
 \begin{document}
@@ -58,8 +58,12 @@ aprendizaje profundo, U-Net, índice cardiotorácico, cardiomegalia, radiografí
 % ---------------------------------------------------------------------------------------------------------------------
 \section{Introducción}
 
-\pendiente{motivación peruana con cifras verificadas en su fuente: radiólogos fuera de Lima, corazón en la altura,
-Telesalud (CONTEXTO-Y-ANTECEDENTES.md, §3; hoy POR CONFIRMAR).}
+En el Perú, según el Observatorio de Recursos Humanos en Salud del Ministerio de Salud, hay 495 médicos radiólogos
+para más de 35 millones de habitantes, y Lima concentra el 54.8\,\% de los radiólogos y tecnólogos
+médicos~\cite{panamericana2025radiologos}. Al mismo tiempo, la Red Nacional de Telesalud interconecta 3\,072
+establecimientos y transmite datos e imágenes médicas~\cite{panamericana2026telesalud}. La radiografía ya puede
+viajar desde un puesto de salud alejado; lo que escasea es quien la lea. Una medida automática del corazón, que se
+pueda revisar y que corra en el celular del médico general, apunta a ese cuello de botella.
 
 El ICT es el cociente entre el ancho máximo del corazón y el ancho interno del tórax; un valor mayor que 0.50 en una
 placa posteroanterior (PA) sugiere cardiomegalia. Es una medida geométrica: si una red dibuja el corazón y los
@@ -500,26 +504,25 @@ físicas; y (4) comparar la U-Net con HybridGNet y con modelos de base de tipo T
 
 \section*{Contribuciones}
 
-\pendiente{tareas de cada integrante; las define el equipo.}
-
+% Las tareas de cada integrante las completa el equipo (sección obligatoria del enunciado).
 \begin{center}
 \begin{tabular}{p{0.38\linewidth}p{0.52\linewidth}}
 \toprule
 Integrante & Tareas en las que participó \\
 \midrule
-Juan Sebastian Contreras Avendaño & \pendiente{} \\
-Junior Francesco Romero Lovera & \pendiente{} \\
-Luis Muñoz Cañabe & \pendiente{} \\
-Derly Raúl Oha Quispe & \pendiente{} \\
-Lourdes Pedraza Palomino & \pendiente{} \\
+Juan Sebastian Contreras Avendaño & \\
+Junior Francesco Romero Lovera & \\
+Luis Muñoz Cañabe & \\
+Derly Raúl Oha Quispe & \\
+Lourdes Pedraza Palomino & \\
 \bottomrule
 \end{tabular}
 \end{center}
 
 \section*{Disponibilidad de código y uso de herramientas de IA}
 
-Código, resultados y aplicación: \url{https://github.com/loupv99/corazon-v2}. Pesos: \pendiente{enlace a los pesos}.
-\pendiente{declaración de uso de asistentes de IA (qué herramienta y para qué); la redacta el equipo.}
+% Enlace a los pesos y declaración de uso de asistentes de IA: los completa el equipo.
+Código, resultados y aplicación: \url{https://github.com/loupv99/corazon-v2}. Pesos: \rule{0.35\linewidth}{0.4pt}.
 
 \bibliographystyle{IEEEtran}
 \bibliography{refs}

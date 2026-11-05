@@ -5,11 +5,12 @@
 
 **Estado 2026-11-04 (tarde):** 6 páginas (límite 12). Metodología, Resultados (con el análisis de Grad-CAM por
 acierto y error, de `results/kaggle-v2/E4_gradcam.csv`), Discusión y Conclusiones redactados con números verificados
-contra `results/`. En rojo, lo pendiente:
-- Introducción: motivación peruana con cifras **verificadas en su fuente** (hoy POR CONFIRMAR en
-  `CONTEXTO-Y-ANTECEDENTES.md`).
-- Contribuciones por integrante y declaración de uso de IA: las define el equipo. **Ambas son obligatorias** según el
-  enunciado (sin Contribuciones, el artículo se considera incompleto en el criterio 6).
+contra `results/`. La motivación peruana (Introducción) usa dos cifras verificadas en su fuente (radiólogos y
+Telesalud; citas literales en `../CONTEXTO-Y-ANTECEDENTES.md`, §3). No queda texto en rojo. Quedan **en blanco**, para
+el equipo:
+- La tabla de Contribuciones y la declaración de uso de IA. **Ambas son obligatorias** según el enunciado (sin
+  Contribuciones, el artículo se considera incompleto en el criterio 6).
+- El enlace a los pesos (línea en blanco tras «Pesos:»).
 - Enlace a los pesos.
 - Título: provisional el candidato 1; se elige al final entre los 3 (comentario al inicio de `main.tex`).
 
