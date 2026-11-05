@@ -9,7 +9,9 @@ débiles (CheXmask) y doradas (SCR), y se mide la robustez a la proyección AP y
 **Estado (2026-11-03):** día 1 corrido en Kaggle ([results/kaggle-v1/](results/kaggle-v1/LEEME.md)). Día 2
 corrido (notebook 02, [results/kaggle-v2/](results/kaggle-v2/LEEME.md)): E1–E4 con 3 semillas. E5 (fotos con celular):
 300 fotos de 100 placas con 2 celulares ([results/e5/](results/e5/LEEME.md)). E6 ([results/e6/](results/e6/LEEME.md))
-y app web ([app/](app/LEEME.md)) listos (2026-11-04). Falta: paper y diapositivas.
+y app web ([app/](app/LEEME.md)) listos (2026-11-04). Paper ([paper/](paper/LEEME.md), 6 p.) y diapositivas
+([slides/](slides/GUION.md), 20) redactados; faltan contribuciones, declaración de IA, enlace a los pesos y notebook
+de demostración en Colab.
 
 ## Estructura
 
@@ -30,6 +32,8 @@ src/
   e6.py            E6: el lado derecho del ICT (MRD) en fracción del tórax y en cm, en aciertos y errores
   exportar_onnx.py U-Net -> ONNX para la app, con verificación contra PyTorch
 app/               app web: mide el ICT en el navegador (ver app/LEEME.md)
+paper/             artículo IEEE (main.tex + refs.bib; ver paper/LEEME.md)
+slides/            diapositivas Beamer; figuras: python slides/figuras.py (ver slides/GUION.md)
 notebooks/
   01_kaggle_datos_y_unet.ipynb   día 1 en Kaggle ("Save & Run All", laptop apagada)
   02_kaggle_semillas_resnet_gradcam.ipynb   día 2: usa el Output del día 1, las dos GPU en paralelo
