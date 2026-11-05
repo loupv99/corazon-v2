@@ -103,8 +103,11 @@ residuales y su versión preentrenada en ImageNet es una línea base habitual de
 pondera los mapas de la última capa convolucional por el gradiente de la clase para mostrar dónde mira la red.
 
 \textbf{Datos y etiquetas.} ChestX-ray14~\cite{wang2017chestxray8} trae 112\,120 radiografías con etiquetas extraídas
-de los informes. CheXmask~\cite{gaggion2024chexmask} publicó máscaras de pulmones y corazón generadas con un modelo,
-con un índice de calidad por imagen (RCA). SCR~\cite{vanginneken2006scr} contiene contornos trazados por personas
+de los informes. CheXmask~\cite{gaggion2024chexmask} publicó máscaras de pulmones y corazón generadas con
+HybridGNet~\cite{gaggion2022hybridgnet}, que codifica la imagen con convoluciones y decodifica los contornos con
+convoluciones sobre grafos, junto con un índice de calidad por imagen (RCA). Nuestra U-Net aprende, entonces, de las
+salidas de una red de grafos más reciente: es una destilación hacia una arquitectura más simple que cabe en un
+navegador. SCR~\cite{vanginneken2006scr} contiene contornos trazados por personas
 sobre la base JSRT~\cite{shiraishi2000jsrt}, y es nuestra referencia dorada.
 
 \textbf{Atajos y robustez.} Zech \emph{et al.}~\cite{zech2018confounding} mostraron que los modelos de radiografías
@@ -342,7 +345,14 @@ pierde 0.141 de AUC al pasar a AP, frente a 0.099 de la entrenada con ambas vist
 Cuando la ResNet-50 predice ``cardiomegalia'', la energía de Grad-CAM dentro del corazón es de 4.3 a 6.4 veces la que
 tendría un mapa uniforme, acierte o no. En los negativos correctos, la razón baja a 1.2--4.3 (rangos entre corridas y
 vistas). La Fig.~\ref{fig:gradcam} muestra ejemplos; en uno se ve el rótulo ``PORTABLE'', una pista de la vista AP
-que está a la vista de la red. \pendiente{análisis fino de Grad-CAM por acierto y vista.}
+que está a la vista de la red.
+
+% results/kaggle-v2/E4_gradcam.csv (rangos entre las 3 semillas y las 2 vistas de la ResNet-50 PA + AP)
+Separando por acierto, los falsos positivos de la ResNet-50 (PA + AP) concentran en el corazón la misma energía que
+los verdaderos positivos (razón de 5.3--6.2 frente a 5.4--6.2), y del 74 al 82\,\% del mapa cae dentro del tórax,
+como en los aciertos (79--85\,\%). En los verdaderos negativos esa fracción baja a 38--52\,\% y la razón a 1.5--3.3;
+los falsos negativos quedan en medio (2.7--4.4). La tasa de falsos positivos es mayor en AP que en PA en las tres
+semillas (0.13--0.40 frente a 0.11--0.24), y en la ResNet-50 entrenada solo con PA llega a 0.34--0.65 en AP.
 
 \begin{figure}[t]
 \centering
@@ -406,23 +416,87 @@ una foto real da el mismo ICT que el código de Python.
 % ---------------------------------------------------------------------------------------------------------------------
 \section{Discusión}\label{sec:dis}
 
-\pendiente{redactar el viernes. Puntos acordados a partir de los resultados:}
+\subsection{Por qué la caja negra detecta mejor}
+
+La hipótesis de que medir detectaría al menos tan bien como clasificar no se sostiene: la ResNet-50 supera al ICT en
+0.078 de AUC con las tres semillas y en ambas vistas. Vemos tres razones. Primera, el ICT reduce la placa a un
+cociente de anchos, mientras que la ResNet-50 ve toda la imagen y puede aprovechar la forma de la silueta, los vasos
+o los hallazgos que acompañan a la cardiomegalia y, como muestra E4, la propia vista. Segunda, la etiqueta del NIH no es
+``ICT $>0.50$'': sale del texto del informe, y al umbral clínico la mitad de las placas sin cardiomegalia lo superan
+(especificidad de 0.504; 0.377 en AP). No es un umbral mal puesto, porque el de Youden en validación cae en
+0.495--0.497; es que las distribuciones del ICT con y sin la etiqueta se solapan. El ICT mide bien una cosa que no
+coincide del todo con lo que la etiqueta llama cardiomegalia. Tercera, Sogancioglu \emph{et al.}~\cite{sogancioglu2020cardiomegaly} entrenaron la
+segmentación con máscaras humanas; la nuestra aprende de máscaras automáticas, lo que abarata la escala pero la ata a
+los sesgos de HybridGNet.
+
+E1c ilustra la segunda razón. Ajustar la U-Net con 80 contornos humanos la acercó a los humanos (ICC de 0.964 a 0.971
+y sesgo casi nulo) y, aun así, bajó el AUC de 0.814 a 0.796 y la especificidad en AP de 0.377 a 0.247 al umbral de
+0.50. Medir mejor no es diagnosticar mejor cuando la etiqueta no es la medida. Hay además un efecto de dominio: la
+mejora se midió en placas JSRT, las mismas de las que salieron los 80 contornos de ajuste, y la pérdida, en
+ChestX-ray14. No aislamos cuál de los dos efectos pesa más.
+
+\subsection{Lo que se gana al medir}
+
+El ICT detecta peor, pero sus errores tienen nombre. En AP, el corazón se ve más grande por la geometría de la toma;
+E6 lo confirma, porque MRD en centímetros es mayor en AP incluso en los verdaderos negativos. Como la causa es
+conocida, una regresión logística con la vista la corrige: la fuga baja de 0.691 a 0.493 y la especificidad en AP
+sube de 0.356 a 0.619, a costa de 0.004 de AUC. La ResNet-50 también codifica la vista (fuga de 0.646, y de 0.710 si
+solo vio placas PA), pero no hay una fórmula que la quite, porque no sabemos qué rasgos la llevan.
+
+Las fotos con celular separan aún más los dos enfoques. Ambos pierden lo mismo de AUC, pero el ICT cambia de decisión
+en menos placas y solo cerca del umbral, donde cualquier medida es dudosa: las placas que cambian estaban a 0.013
+de 0.50. Con las fotos reales, la ResNet-50 cambia de decisión hasta en el 13.3\,\% de las placas, y nada en su
+salida avisa cuáles son. Las
+degradaciones sintéticas subestimaron el efecto real sobre el ICT, así que no bastan para validar un sistema que
+recibirá fotos.
+
+Grad-CAM no ofrece esa garantía. Los falsos positivos de la ResNet-50 miran al corazón con la misma intensidad que
+los aciertos, de modo que el mapa muestra \emph{dónde} mira la red pero no permite saber si se equivocó. En el ICT,
+en cambio, el error se ve en la placa: si la línea del borde derecho cae fuera del corazón, el médico la arrastra y
+el número cambia. Esa es la diferencia práctica entre explicar y medir.
+
+E6 delimita lo que el ICT no ve. La mitad derecha (MRD/ID) separa peor que la izquierda (AUC de 0.697 frente a
+0.735), y los falsos negativos no esconden un lado derecho agrandado: su MRD/ID es como el de los verdaderos
+negativos. El ICT frontal no sirve para sospechar crecimiento del ventrículo derecho; para eso haría falta la placa
+lateral.
+
+\subsection{Limitaciones y sesgos}
+
 \begin{itemize}
-\item H2 se refuta: la caja negra detecta mejor (0.892 frente a 0.814). A diferencia
-  de~\cite{sogancioglu2020cardiomegaly}, nuestra segmentación se entrenó con máscaras automáticas y el umbral 0.50 no
-  es necesariamente el criterio de los informes del NIH. Que E1c mida mejor y diagnostique peor apoya esta lectura
-  (POR CONFIRMAR).
-\item El valor del ICT está en que se puede auditar: su error en AP tiene causa conocida y corrección, y en las fotos
-  solo cambia de decisión en casos limítrofes.
-\item La ResNet-50 aprende la vista (fuga de 0.646 a 0.710) y puede usar rótulos como ``PORTABLE''.
-\item Limitaciones: etiquetas del NIH extraídas por procesamiento de lenguaje; población de EE.\,UU. y Japón; umbral
-  0.50 de poblaciones de llanura; las fotos son de una pantalla y no de placas físicas; una sola sesión de fotos; el
-  ICT no aísla el ventrículo derecho. No es un dispositivo médico.
+\item \textbf{Etiquetas.} Las de ChestX-ray14 se extrajeron de informes con procesamiento de lenguaje y tienen
+  ruido; no medimos cuánto en nuestro subconjunto.
+\item \textbf{Población.} ChestX-ray14 viene de un hospital de EE.\,UU. y JSRT/SCR de Japón. No evaluamos placas
+  peruanas, y el umbral de 0.50 viene de poblaciones de llanura; no sabemos si vale para quien vive en altura.
+\item \textbf{Fotos.} Las 300 fotos son de radiografías en un monitor, no de placas físicas en un negatoscopio;
+  se tomaron en una sola sesión, con dos celulares y un operador, sobre 100 placas balanceadas por grupo.
+\item \textbf{Referencia dorada.} El acuerdo clínico se mide en 147 placas JSRT, todas PA y digitalizadas de
+  película; no hay contornos humanos en placas AP.
+\item \textbf{Aplicación.} Para una foto, las esquinas se marcan a mano; la medida en un celular real no se ha
+  probado con usuarios.
 \end{itemize}
+
+\subsection{Impacto y uso responsable}
+
+El uso que proponemos es de apoyo: una segunda lectura que da una cifra y la muestra sobre la placa, no un
+diagnóstico. La aplicación procesa la imagen en el dispositivo y no la envía a ningún servidor, lo que evita mover
+datos clínicos. Los riesgos son concretos: aplicar el umbral de 0.50 a placas AP sin corregir multiplica los falsos
+positivos; confiar en la probabilidad de la ResNet-50 sin mirar la placa invita al sesgo de automatización; y usar
+cualquiera de los dos en una población no evaluada traslada sesgos que aquí no medimos. No es un dispositivo médico
+ni ha pasado una validación clínica.
 
 \section{Conclusiones}\label{sec:con}
 
-\pendiente{redactar el viernes, 1--2 párrafos sin repetir el resumen, con trabajo futuro concreto.}
+Una U-Net entrenada solo con máscaras automáticas mide el índice cardiotorácico con un ICC de 0.945--0.951 frente a
+contornos humanos, que sube a 0.964--0.971 con solo 80 de ellos. Esa medida, aunque detecta cardiomegalia peor que una
+ResNet-50, falla de forma predecible: su error en placas AP tiene causa física y se corrige con la vista, y ante una
+foto de celular solo cambia de decisión cerca del umbral. La caja negra acierta más, pero codifica la vista, cambia
+más decisiones con las fotos y su mapa de Grad-CAM se ve igual cuando acierta que cuando falla. Para un servicio sin
+radiólogo, la elección no es solo de exactitud sino de qué error puede revisar quien usa la herramienta.
+
+Como trabajo futuro planteamos: (1) validar con placas peruanas y con el ICT medido por radiólogos, incluido un
+umbral propio por vista y por altitud; (2) combinar ambos enfoques en la aplicación, con la ResNet-50 como alerta y el
+ICT como explicación revisable; (3) detectar las esquinas de la placa de forma automática y probar fotos de placas
+físicas; y (4) comparar la U-Net con HybridGNet y con modelos de base de tipo Transformer como fuentes de máscaras.
 
 \section*{Contribuciones}
 

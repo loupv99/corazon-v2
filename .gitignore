@@ -12,3 +12,10 @@ paper/*.blg
 paper/*.out
 paper/*.fls
 paper/*.fdb_latexmk
+slides/*.aux
+slides/*.log
+slides/*.nav
+slides/*.out
+slides/*.snm
+slides/*.toc
+slides/*.vrb
