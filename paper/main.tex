@@ -423,7 +423,8 @@ una foto real da el mismo ICT que el código de Python.
 \subsection{Por qué la caja negra detecta mejor}
 
 La hipótesis de que medir detectaría al menos tan bien como clasificar no se sostiene: la ResNet-50 supera al ICT en
-0.078 de AUC con las tres semillas y en ambas vistas. Vemos tres razones. Primera, el ICT reduce la placa a un
+0.078 de AUC (0.070 a 0.090 según la semilla; 0.080 en PA y 0.069 en AP), y gana en cada semilla y en cada
+vista. Vemos tres razones. Primera, el ICT reduce la placa a un
 cociente de anchos, mientras que la ResNet-50 ve toda la imagen y puede aprovechar la forma de la silueta, los vasos
 o los hallazgos que acompañan a la cardiomegalia y, como muestra E4, la propia vista. Segunda, la etiqueta del NIH no es
 ``ICT $>0.50$'': sale del texto del informe, y al umbral clínico la mitad de las placas sin cardiomegalia lo superan
@@ -433,8 +434,8 @@ coincide del todo con lo que la etiqueta llama cardiomegalia. Tercera, Soganciog
 segmentación con máscaras humanas; la nuestra aprende de máscaras automáticas, lo que abarata la escala pero la ata a
 los sesgos de HybridGNet.
 
-E1c ilustra la segunda razón. Ajustar la U-Net con 80 contornos humanos la acercó a los humanos (ICC de 0.964 a 0.971
-y sesgo casi nulo) y, aun así, bajó el AUC de 0.814 a 0.796 y la especificidad en AP de 0.377 a 0.247 al umbral de
+E1c ilustra la segunda razón. Ajustar la U-Net con 80 contornos humanos la acercó a los humanos (ICC de 0.945--0.951 a
+0.964--0.971 y sesgo casi nulo) y, aun así, bajó el AUC de 0.814 a 0.796 y la especificidad en AP de 0.377 a 0.247 al umbral de
 0.50. Medir mejor no es diagnosticar mejor cuando la etiqueta no es la medida. Hay además un efecto de dominio: la
 mejora se midió en placas JSRT, las mismas de las que salieron los 80 contornos de ajuste, y la pérdida, en
 ChestX-ray14. No aislamos cuál de los dos efectos pesa más.
