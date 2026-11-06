@@ -10,7 +10,7 @@ débiles (CheXmask) y doradas (SCR), y se mide la robustez a la proyección AP y
 corrido (notebook 02, [results/kaggle-v2/](results/kaggle-v2/LEEME.md)): E1–E4 con 3 semillas. E5 (fotos con celular):
 300 fotos de 100 placas con 2 celulares ([results/e5/](results/e5/LEEME.md)). E6 ([results/e6/](results/e6/LEEME.md))
 y app web ([app/](app/LEEME.md)) listos (2026-11-04). Paper ([paper/](paper/LEEME.md), 6 p.) y diapositivas
-([slides/](slides/GUION.md), 20) redactados; faltan contribuciones, declaración de IA, enlace a los pesos y notebook
+([slides/](slides/GUION.md), 23) redactados; faltan contribuciones, declaración de IA, enlace a los pesos y notebook
 de demostración en Colab.
 
 ## Estructura

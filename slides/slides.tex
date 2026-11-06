@@ -1,4 +1,4 @@
-% Corazón v2 — diapositivas de la sustentación (MIA-203, Grupo 6). 20 diapositivas, 25 min.
+% Corazón v2 — diapositivas de la sustentación (MIA-203, Grupo 6). 23 diapositivas, 25 min.
 % Compilar desde slides/: pdflatex slides (dos veces). Figuras: python slides/figuras.py desde la raíz del repo.
 % Cada número sale de results/ (el mismo archivo que cita paper/main.tex).
 \documentclass[aspectratio=169,11pt]{beamer}
@@ -10,8 +10,21 @@
 \usepackage{booktabs}
 \usepackage{array}
 \usepackage{tikz}
-\usetikzlibrary{positioning,arrows.meta}
+\usetikzlibrary{positioning,arrows.meta,calc}
 
+\tikzset{
+  carta/.style={draw=#1, line width=1pt, fill=white, rounded corners=4pt, text width=40mm, inner sep=6pt,
+    align=left, anchor=north, minimum height=36mm},
+  num/.style={circle, fill=#1, text=white, font=\bfseries, inner sep=2pt, minimum size=6mm},
+  sale/.style={draw=#1, line width=0.9pt, fill=white, rounded corners=2pt, text width=21mm, align=center,
+    minimum height=10mm, inner sep=2pt},
+  fu/.style={draw=#1, line width=0.9pt, rounded corners=3pt, fill=white, text width=21mm, align=left, inner sep=4pt,
+    minimum height=11mm},
+  flechacol/.style={-{Stealth[length=1.8mm]}, thick, color=#1},
+  cc/.style={draw=#1, line width=0.9pt, rounded corners=3pt, fill=white, text width=25mm, align=center, inner sep=3pt,
+    minimum height=11mm},
+  rr/.style={draw=#1, line width=0.9pt, rounded corners=3pt, fill=white, text width=22mm, align=center, inner sep=3pt,
+    minimum height=10mm}}
 % --- Estilo -----------------------------------------------------------------------------------------------------------
 \definecolor{tinta}{HTML}{1F2328}
 \definecolor{tinta2}{HTML}{57606A}
@@ -59,7 +72,41 @@ Derly Raúl Oha Quispe · Lourdes Pedraza Palomino
 \end{frame}
 
 % ======================================================================================================================
-% Bloque 1 — Problema, motivación y contribuciones (3 min)
+% Bloque 1 — Contexto, problema, motivación y contribuciones (3 min)
+\begin{frame}{Contexto: un siglo midiendo el corazón en la placa}
+\bloque{Contexto y antecedentes}
+\centering
+\begin{tikzpicture}[font=\scriptsize,
+  hito/.style={align=center, text width=21mm, anchor=north},
+  anio/.style={font=\small\bfseries, anchor=south}]
+\draw[linea, line width=2.5pt] (0,0) -- (14.4,0);
+\foreach \x/\a/\col/\txt in {
+  1.2/1919/medir/{\textbf{Danzer} define el ICT: si pasa de 0.50, el corazón es sospechoso. Se mide a mano.},
+  3.6/2006/tinta2/{\textbf{SCR}: personas trazan pulmones y corazón en 247 placas JSRT.},
+  6.0/2015--16/tinta2/{\textbf{U-Net} segmenta con pocos datos; \textbf{ResNet} entrena redes muy profundas.},
+  8.4/2017/clasif/{\textbf{ChestX-ray8/14}: 108\,948 placas con etiquetas sacadas del informe.},
+  10.8/2020/medir/{\textbf{Sogancioglu}: medir gana a clasificar (AUC 0.977 vs.\ 0.941) con anotación humana.},
+  13.2/2024/medir/{\textbf{CheXmask}: 657\,566 máscaras automáticas (HybridGNet).}}{
+  \fill[\col] (\x,0) circle (4pt);
+  \node[anio, color=\col] at (\x,0.2) {\a};
+  \node[hito] at (\x,-0.3) {\txt};
+}
+\end{tikzpicture}
+
+\vspace{0.3em}
+\begin{tikzpicture}[font=\small]
+\node[fill=fondo2, rounded corners=4pt, inner sep=4pt, text width=13.8cm, align=center] {%
+\textbf{Y en el Perú}\\[-0.1em]
+\begin{tabular}{>{\centering}p{4.1cm}>{\centering}p{4.1cm}>{\centering\arraybackslash}p{4.1cm}}
+{\color{medir}\LARGE\bfseries 495} & {\color{medir}\LARGE\bfseries 54.8\,\%} & {\color{medir}\LARGE\bfseries 3\,072}\\
+radiólogos para más de 35 millones & de radiólogos y tecnólogos, en Lima & establecimientos en la Red de Telesalud
+\end{tabular}\\[0.3em]
+\textbf{La placa ya puede viajar; lo que falta es quien la lea.}};
+\end{tikzpicture}\\[-0.1em]
+{\color{tinta2}\tiny Fuentes: Danzer 1919 · Wang \emph{et al.} 2017 · Sogancioglu \emph{et al.} 2020 · Gaggion \emph{et al.} 2024 ·
+MINSA, vía Panamericana (2025, 2026)}
+\end{frame}
+
 \begin{frame}{El problema: ¿el corazón está agrandado?}
 \bloque{Problema y motivación}
 \begin{columns}[T]
@@ -80,61 +127,152 @@ Derly Raúl Oha Quispe · Lourdes Pedraza Palomino
 \end{columns}
 \end{frame}
 
-\begin{frame}{Pregunta y contribuciones}
+\begin{frame}{Pregunta, hipótesis y contribuciones}
 \bloque{Problema y motivación}
-\begin{center}
-{\large ¿Una red que \M{mide} como el radiólogo detecta tan bien\\como una red que \C{clasifica} sin explicar? ¿Y cuál falla mejor?}
-\end{center}
-\vspace{0.6em}
-\begin{enumerate}
-\item \textbf{Comparación controlada medir frente a clasificar}, con las mismas particiones y 3 semillas: U-Net
-  entrenada con \emph{máscaras automáticas} (CheXmask) y evaluada contra \emph{contornos humanos} (SCR).
-\item \textbf{El atajo de la proyección AP}, medido en ambos enfoques, con una corrección explícita para el ICT y
-  Grad-CAM para la caja negra.
-\item \textbf{Un conjunto de datos propio}: 300 fotos con celular de 100 radiografías, con marcas ArUco para
-  enderezarlas, y una \textbf{aplicación web} que mide el ICT en el teléfono y deja corregir la medida.
-\end{enumerate}
+\centering
+\begin{tikzpicture}[font=\small]
+\node[fill=fondo2, rounded corners=4pt, inner sep=7pt, text width=13.4cm, align=center] (q) {%
+{\large ¿Una red que \M{mide} como el radiólogo detecta tan bien como una que \C{clasifica} sin explicar?
+¿Y cuál falla mejor?}\\[0.25em]
+\textbf{Hipótesis:} medir detecta al menos igual, y sus errores se pueden ver y corregir.};
+\node[carta=medir] (c1) at ($(q.south)+(-4.75,-0.55)$) {%
+\textbf{Medir frente a clasificar, en igualdad}\\[0.2em]
+Mismas placas, partición y aumento; 3 semillas. U-Net con \emph{máscaras automáticas}, evaluada con
+\emph{contornos humanos}.\\[0.3em]
+{\color{medir}\bfseries $\rightarrow$ E1, E2, E3}};
+\node[carta=clasif] (c2) at ($(q.south)+(0,-0.55)$) {%
+\textbf{El atajo de la vista AP}\\[0.2em]
+¿Las dos redes usan la proyección en vez del corazón? Corrección explícita para el ICT; Grad-CAM para la caja
+negra.\\[0.3em]
+{\color{clasif}\bfseries $\rightarrow$ E4, E6}};
+\node[carta=tinta2] (c3) at ($(q.south)+(4.75,-0.55)$) {%
+\textbf{Datos y aplicación propios}\\[0.2em]
+300 fotos con celular de 100 placas, con marcas ArUco para enderezarlas. App web que mide en el teléfono y deja
+corregir.\\[0.3em]
+{\color{tinta2}\bfseries $\rightarrow$ E5}};
+\node[num=medir] at (c1.north west) {1};
+\node[num=clasif] at (c2.north west) {2};
+\node[num=tinta2] at (c3.north west) {3};
+\end{tikzpicture}
 \end{frame}
 
 % ======================================================================================================================
 % Bloque 2 — Trabajos relacionados y fundamento teórico (3 min)
-\begin{frame}{Trabajos relacionados}
-\bloque{Trabajos relacionados}
-\footnotesize\renewcommand{\arraystretch}{1.25}
-\begin{tabular}{@{}>{\raggedright}p{0.25\textwidth}>{\raggedright}p{0.33\textwidth}>{\raggedright\arraybackslash}p{0.36\textwidth}@{}}
+\newcommand{\tablarel}[1]{%
+\scriptsize\renewcommand{\arraystretch}{1.2}\setlength{\tabcolsep}{4pt}%
+\begin{tabular}{@{}>{\raggedright}p{0.15\textwidth}>{\raggedright}p{0.2\textwidth}>{\raggedright}p{0.2\textwidth}%
+>{\raggedright}p{0.17\textwidth}>{\raggedright\arraybackslash}p{0.2\textwidth}@{}}
 \toprule
-Trabajo & Qué hace & En qué nos diferenciamos \\
+\textbf{Trabajo} & \textbf{Metodología} & \textbf{Principales hallazgos} & \textbf{Aporte al conocimiento} &
+\textbf{En qué nos diferenciamos}\\
 \midrule
-Ronneberger 2015 · U-Net & Codificador-decodificador con saltos & La usamos para medir, no solo segmentar \\
-He 2016 · ResNet & Conexiones residuales & Línea base de caja negra \\
-Selvaraju 2017 · Grad-CAM & Mapa de dónde mira la red & Lo cuantificamos por acierto y error \\
-Sogancioglu 2020 & Segmentación vs.\ clasificación & Máscaras \emph{automáticas}, vista AP, fotos \\
-Chamveha 2020 & ICT como MRD + MLD & Cada lado por separado (E6) \\
-Gaggion 2022, 2024 · HybridGNet, CheXmask & Máscaras con una red de grafos & Las destilamos en una U-Net ligera \\
-Zech 2018 · CheXphoto 2020 & Atajos de hospital; fotos de placas & Ambos efectos sobre una \emph{medida} \\
+#1
 \bottomrule
-\end{tabular}
+\end{tabular}}
+
+\begin{frame}{Trabajos relacionados (1/2): arquitecturas y datos}
+\bloque{Trabajos relacionados}
+\tablarel{%
+\textbf{Ronneberger, 2015}\\ U-Net &
+Codificador-decodificador con saltos; aumento de datos fuerte &
+Segmenta bien con muy pocas imágenes; ganó ISBI 2015 &
+Segmentación precisa con pocos datos &
+\M{La usamos para medir el ICT}, entrenada con máscaras automáticas \\
+\textbf{He, 2016}\\ ResNet &
+Bloques residuales $y=F(x)+x$, hasta 152 capas &
+3.57\,\% de error en ImageNet; 1.\textsuperscript{er} puesto en ILSVRC 2015 &
+Redes muy profundas que sí se optimizan &
+ResNet-50 como \C{caja negra de referencia} \\
+\textbf{Selvaraju, 2017}\\ Grad-CAM &
+Gradientes sobre la última capa convolucional, sin reentrenar &
+Localiza regiones relevantes y revela sesgos del conjunto &
+Explicación visual para cualquier CNN &
+\C{La cuantificamos} en aciertos y en errores \\
+\textbf{Wang, 2017}\\ ChestX-ray8/14 &
+108\,948 placas de 32\,717 pacientes; etiquetas del informe con PLN &
+Detecta con etiquetas débiles, pero leer la placa sigue siendo difícil &
+Primera base pública grande de tórax &
+Su etiqueta no equivale a ICT $>$ 0.50 (esp.\ 0.504) \\
+}
+\end{frame}
+
+\begin{frame}{Trabajos relacionados (2/2): cardiomegalia y robustez}
+\bloque{Trabajos relacionados}
+\tablarel{%
+\textbf{Sogancioglu, 2020} &
+Segmentación (778 anotadas) vs.\ clasificación (65\,000) &
+AUC 0.977 frente a 0.941, en 367 placas etiquetadas por 2 radiólogos &
+Medir gana con 100 veces menos anotaciones &
+Etiqueta del informe y \M{máscaras automáticas}: gana clasificar \\
+\textbf{Chamveha, 2020} &
+U-Net con VGG16; ICT $=(\text{MRD}+\text{MLD})/\text{ID}$ &
+Radiólogos aceptan sin cambios el 76.5\,\% de las medidas &
+ICT automático usable en el informe &
+\M{MRD y MLD por separado} (E6); vista AP y fotos \\
+\textbf{Gaggion, 2023--24}\\ HybridGNet, CheXmask &
+Conv.\ + grafos; 657\,566 máscaras &
+Contornos plausibles donde otros modelos fallan &
+Máscaras anatómicas a gran escala &
+Las \M{destilamos en una U-Net} para el navegador \\
+\textbf{Zech, 2018}; \textbf{Phillips, 2020} (CheXphoto) &
+CNN en 3 hospitales (158\,323 placas); fotos con celular y sintéticas &
+La CNN reconoce el hospital (99.95\,\%, NIH); CheXphoto: conjunto de robustez &
+Atajos del origen; escenario de fotos &
+Atajo de la \C{vista AP} en ambos enfoques; fotos propias con ArUco \\
+}
 \end{frame}
 
 \begin{frame}{Fundamento: por qué estas dos arquitecturas}
 \bloque{Fundamento teórico}
 \begin{columns}[T]
-\begin{column}{0.48\textwidth}
-\M{U-Net — medir}
-\begin{itemize}
-\item El codificador baja a 1/16 para ver contexto; los \textbf{saltos} devuelven el detalle del borde.
-\item El ICT depende de bordes exactos: un error de 3 px en 256 cambia el ICT en $\sim$0.01.
-\item Sigmoide por canal: el corazón se superpone a los pulmones.
-\item Salida \textbf{verificable}: contornos que el médico ve.
+\begin{column}{0.49\textwidth}
+\M{U-Net — medir}\\[0.2em]
+\centering
+\begin{tikzpicture}[font=\scriptsize, x=1cm, y=1cm,
+  enc/.style={draw=medir, fill=medir!12, minimum height=3.6mm, inner sep=1pt},
+  flecha/.style={-{Stealth[length=1.6mm]}, color=tinta2}]
+\foreach \i/\w/\ch in {0/0.5/32, 1/0.65/64, 2/0.8/128, 3/0.95/256}{
+  \node[enc, minimum width=\w cm] (e\i) at (0.6+0.35*\i,-0.55*\i) {\ch};
+  \node[enc, minimum width=\w cm] (d\i) at (5.0-0.35*\i,-0.55*\i) {\ch};
+  \draw[dashed, medir, -{Stealth[length=1.6mm]}] (e\i.east) -- (d\i.west);
+}
+\node[draw=tinta, fill=fondo2, minimum width=1.0cm, minimum height=3.6mm, inner sep=1pt] (b) at (2.8,-2.2) {512};
+\foreach \i/\j in {0/1,1/2,2/3}{\draw[flecha] (e\i.south) -- (e\j.north); \draw[flecha] (d\j.north) -- (d\i.south);}
+\draw[flecha] (e3.south) |- (b.west); \draw[flecha] (b.east) -| (d3.south);
+\node[above=0.5mm of e0, text=tinta2] {placa 256 px};
+\node[above=0.5mm of d0, text=tinta2] {3 sigmoides};
+\node[text=tinta2, align=center] at (2.8,-2.85) {cuello de 16 px: contexto de toda la placa\\
+{\color{medir}- - -$\rightarrow$ saltos: devuelven el detalle del borde}};
+\end{tikzpicture}
+\begin{itemize}\small
+\item El ICT depende del borde: 3 px de error en 256 cambian el ICT en $\sim$0.01.
+\item Salida \textbf{verificable}: contornos que el médico ve y corrige.
 \end{itemize}
 \end{column}
-\begin{column}{0.48\textwidth}
-\C{ResNet-50 — clasificar}
-\begin{itemize}
-\item Bloques residuales $y=F(x)+x$: profundidad sin degradación.
+\begin{column}{0.49\textwidth}
+\C{ResNet-50 — clasificar}\\[0.6em]
+\centering
+\begin{tikzpicture}[font=\scriptsize, node distance=2mm,
+  capa/.style={draw=clasif, fill=clasif!12, minimum height=4.5mm, inner sep=2pt},
+  flecha/.style={-{Stealth[length=1.6mm]}, color=tinta2}]
+\node (x) {$x$};
+\node[capa, right=of x] (c1) {conv $1\times1$};
+\node[capa, right=of c1] (c2) {conv $3\times3$};
+\node[capa, right=of c2] (c3) {conv $1\times1$};
+\node[circle, draw=tinta, inner sep=0.5pt, right=of c3] (s) {$+$};
+\node[right=of s] (y) {$y$};
+\draw[flecha] (x) -- (c1); \draw[flecha] (c1) -- (c2); \draw[flecha] (c2) -- (c3); \draw[flecha] (c3) -- (s);
+\draw[flecha] (s) -- (y);
+\draw[flecha, clasif, thick] (x.north) -- ++(0,0.4) -| node[pos=0.25, above, text=clasif] {identidad: $y=F(x)+x$} (s.north);
+\end{tikzpicture}\\[0.6em]
+\begin{tikzpicture}[font=\small]
+\node[draw=clasif, rounded corners=3pt, fill=white, inner sep=4pt, text width=6.4cm, align=center] {%
+\textbf{Grad-CAM} sobre la última capa:\\[0.1em]
+$L=\mathrm{ReLU}\big(\sum_k \alpha_k A^k\big)$, \ $\alpha_k=\frac{1}{Z}\sum_{i,j}\frac{\partial y}{\partial A^k_{ij}}$};
+\end{tikzpicture}
+\begin{itemize}\small
 \item Preentrenada en ImageNet: buen punto de partida con 5\,416 placas.
-\item Ve toda la placa: puede usar señales que el ICT ignora… y atajos.
-\item Grad-CAM: $\;L=\mathrm{ReLU}\big(\sum_k \alpha_k A^k\big)$,\\ $\alpha_k=\frac{1}{Z}\sum_{i,j}\frac{\partial y}{\partial A^k_{ij}}$
+\item Ve toda la placa: puede usar señales que el ICT ignora\dots\ y atajos.
 \end{itemize}
 \end{column}
 \end{columns}
@@ -142,10 +280,37 @@ Zech 2018 · CheXphoto 2020 & Atajos de hospital; fotos de placas & Ambos efecto
 
 % ======================================================================================================================
 % Bloque 3 — Datos y metodología (6 min)
+\begin{frame}{Preparación de datos: de cuatro fuentes a un mismo formato}
+\bloque{Datos}
+\vspace{0.4em}
+\centering
+\begin{tikzpicture}[font=\scriptsize, x=1cm, y=1cm,
+  paso/.style={draw=linea, fill=fondo2, rounded corners=2pt, text width=23mm, align=center, minimum height=9.5mm,
+    inner sep=2pt},
+  fuente/.style={text width=19mm, align=left, inner sep=1pt},
+  flecha/.style={-{Stealth[length=1.6mm]}, color=tinta2}]
+\foreach \fila/\y/\col/\nom/\sub/\pa/\pb/\pc/\pd/\fin in {
+  0/0/clasif/{ChestX-ray14}/{NIH · 112\,120 placas}/{2\,776 con cardiomegalia + 6\,000 sin ella}/{Partición por \textbf{paciente}; prueba oficial del NIH}/{PNG $\rightarrow$ gris $\rightarrow$ 256 px (promedio de área)}/{Guarda mm/píxel y vista PA/AP}/{\textbf{8\,776} placas},
+  1/-1.2/medir/{CheXmask}/{máscaras débiles}/{CSV de 2 GB leído por partes}/{RLE $\rightarrow$ 3 máscaras de 1\,024 px}/{Reducción por área + umbral 0.5}/{Calidad RCA e ICT sin red}/{\textbf{8\,666} con RCA $\geq$ 0.7},
+  2/-2.4/medir/{SCR / JSRT}/{contornos humanos}/{247 contornos trazados a mano}/{Rasterizar a máscaras}/{Imágenes JSRT \textbf{limpias} (sin contorno dibujado)}/{Gris invertido si hace falta, comprobado}/{\textbf{100} ajuste · \textbf{147} prueba},
+  3/-3.6/tinta2/{Fotos propias}/{E5}/{100 placas: 25 por grupo PA/AP $\times$ con/sin}/{Monitor con 5 marcas ArUco}/{iPhone de frente e inclinada; Honor de frente}/{Homografía $\rightarrow$ 256 px}/{\textbf{300} fotos}}{
+  \node[fuente] (f\fila) at (1.0,\y) {{\color{\col}\bfseries\nom}\\{\color{tinta2}\sub}};
+  \node[paso] (a\fila) at (3.25,\y) {\pa};
+  \node[paso] (b\fila) at (5.80,\y) {\pb};
+  \node[paso] (c\fila) at (8.35,\y) {\pc};
+  \node[paso] (d\fila) at (10.90,\y) {\pd};
+  \node[sale=\col] (s\fila) at (13.35,\y) {\fin};
+  \draw[flecha] (a\fila) -- (b\fila); \draw[flecha] (b\fila) -- (c\fila); \draw[flecha] (c\fila) -- (d\fila);
+  \draw[flecha] (d\fila) -- (s\fila);
+}
+\end{tikzpicture}\\[0.4em]
+\nota{Salida común: arrays de 256 px (pulmón derecho, izquierdo, corazón) + una tabla por placa. Una sola vez, $\sim$20 min en Kaggle.}
+\end{frame}
+
 \begin{frame}{Datos: tres fuentes, una partición sin fuga}
 \bloque{Datos}
 \begin{columns}[T]
-\begin{column}{0.55\textwidth}
+\begin{column}{0.5\textwidth}
 \small
 \begin{tabular}{lrrr}
 \toprule
@@ -164,17 +329,20 @@ Prueba (oficial NIH) & 2\,354 & 1\,069 & 1\,335 \\
 \item \alert{La vista está asociada a la etiqueta}: 43.7\,\% AP en cardiomegalia frente a 38.5\,\% sin ella.
 \end{itemize}
 \end{column}
-\begin{column}{0.4\textwidth}
-\small
-\textbf{CheXmask} (CC BY 4.0)\\ máscaras \emph{automáticas} de pulmones y corazón para las 8\,776 placas; 8\,666 con
-calidad RCA $\geq$ 0.7.
-
-\vspace{0.6em}
-\textbf{SCR / JSRT} (CC BY 4.0)\\ contornos \emph{humanos} en 247 placas: 147 de prueba dorada, 80 + 20 para ajuste
-fino.
-
-\vspace{0.6em}
-\textbf{Fotos propias}\\ 300 fotos de 100 placas de prueba con dos celulares.
+\begin{column}{0.48\textwidth}
+\textbf{Qué papel cumple cada fuente}\\[0.3em]
+\begin{tikzpicture}[font=\scriptsize,
+  rol/.style={fill=fondo2, rounded corners=3pt, text width=31mm, align=left, inner sep=4pt, minimum height=10.5mm}]
+\foreach \i/\col/\f/\r in {
+  0/clasif/{\textbf{ChestX-ray14}\\etiqueta del informe}/{\textbf{Diagnóstico}: entrena la ResNet y evalúa a ambos (E2, E4)},
+  1/medir/{\textbf{CheXmask}\\automáticas, CC BY 4.0}/{\textbf{Enseña}: entrena la U-Net (E1a, E1b)},
+  2/medir/{\textbf{SCR / JSRT}\\humanas, CC BY 4.0}/{\textbf{Juzga y ajusta}: Dice e ICC (E1, E3); 80 + 20 para E1c},
+  3/tinta2/{\textbf{Fotos propias}\\2 celulares}/{\textbf{Pone a prueba}: decisiones que cambian (E5)}}{
+  \node[fu=\col] (f\i) at (0,-1.25*\i) {\f};
+  \node[rol, anchor=west] (r\i) at (1.75,-1.25*\i) {\r};
+  \draw[flechacol=\col] (f\i) -- (r\i);
+}
+\end{tikzpicture}
 \end{column}
 \end{columns}
 \end{frame}
@@ -182,14 +350,19 @@ fino.
 \begin{frame}{Etiquetas débiles, referencia humana}
 \bloque{Datos}
 \centering
-\includegraphics[width=0.92\textwidth]{../results/kaggle-v1/control_scr.png}\\[0.4em]
-\nota{Contornos humanos de SCR rasterizados (azul: pulmón derecho; verde: izquierdo; rojo: corazón)}
-\vspace{0.6em}
-\begin{itemize}
-\item La U-Net \textbf{aprende} de máscaras de HybridGNet (convoluciones + red de grafos) y se \textbf{evalúa} en
-  contornos trazados por personas: una destilación hacia una red que cabe en un navegador.
-\item Sin volteo horizontal en el aumento: el corazón está a la izquierda del paciente.
-\end{itemize}
+\includegraphics[width=0.72\textwidth]{../results/kaggle-v1/control_scr.png}\\[0.1em]
+\nota{Contornos humanos de SCR rasterizados (azul: pulmón derecho; verde: izquierdo; rojo: corazón)}\\[0.5em]
+\begin{tikzpicture}[font=\scriptsize, node distance=8mm,
+  flecha/.style={-{Stealth[length=2mm]}, thick, color=tinta2}]
+\node[cc=tinta2] (h) {\textbf{HybridGNet}\\maestro: conv.\ + grafos};
+\node[cc=medir, right=of h] (cm) {\textbf{CheXmask}\\8\,666 máscaras, RCA $\geq$ 0.7};
+\node[cc=medir, right=of cm] (u) {\textbf{U-Net}\\alumna: 7.8 M parám.};
+\node[cc=tinta, right=of u] (s) {\textbf{SCR}: 147 placas\\juez humano (Dice, ICC)};
+\draw[flecha] (h) -- (cm); \draw[flecha] (cm) -- (u); \draw[flecha] (u) -- (s);
+\draw[flecha, medir, dashed] (s.south) -- ++(0,-0.35) -| node[pos=0.25, below, text=medir]{E1c: 80 + 20 contornos humanos para ajustar} (u.south);
+\end{tikzpicture}\\[0.2em]
+\nota{Una destilación hacia una red que cabe en un navegador. Sin volteo horizontal en el aumento: el corazón está a la
+izquierda del paciente.}
 \end{frame}
 
 \begin{frame}{Arquitectura del sistema}
@@ -225,24 +398,43 @@ que la U-Net.
 \begin{frame}{Formulación: pérdida y medida}
 \bloque{Metodología}
 \begin{columns}[T]
-\begin{column}{0.5\textwidth}
-\M{Segmentación}: BCE + Dice promediado por canal
-\[\mathcal{L}_{\text{seg}}=\text{BCE}(\hat y,y)+1-\frac13\sum_{c=1}^{3}\frac{2\sum_i\hat y_{c,i}y_{c,i}+\epsilon}{\sum_i\hat y_{c,i}+\sum_i y_{c,i}+\epsilon}\]
-\nota{El promedio por canal evita que los pulmones, más grandes, dominen al corazón.}
-
-\vspace{0.8em}
-\C{Clasificación}: BCE con peso $w_+=N_-/N_+$
-\[\mathcal{L}_{\text{cls}}=-\frac1N\sum_n\big[w_+y_n\log p_n+(1-y_n)\log(1-p_n)\big]\]
+\begin{column}{0.48\textwidth}
+\begin{tikzpicture}[font=\footnotesize]
+\node[draw=medir, line width=0.9pt, rounded corners=3pt, inner sep=4pt, text width=6.7cm, font=\scriptsize] (s) {%
+\M{Segmentación}: BCE + Dice promediado por canal\\[-0.6em]
+\[\mathcal{L}_{\text{seg}}=\text{BCE}(\hat y,y)+1-\frac13\sum_{c=1}^{3}\frac{2\sum_i\hat y_{c,i}y_{c,i}+\epsilon}{\sum_i\hat y_{c,i}+\sum_i y_{c,i}+\epsilon}\]\\[-0.8em]
+\vspace{0pt}
+{\color{tinta2}Promediar por canal evita que los pulmones, más grandes, dominen al corazón.}};
+\node[draw=clasif, line width=0.9pt, rounded corners=3pt, inner sep=4pt, text width=6.7cm, font=\scriptsize, below=3mm of s] {%
+\C{Clasificación}: BCE con peso $w_+=N_-/N_+$\\[-0.6em]
+\[\mathcal{L}_{\text{cls}}=-\frac1N\sum_n\big[w_+y_n\log p_n+(1-y_n)\log(1-p_n)\big]\]\\[-0.8em]
+{\color{tinta2}El peso compensa que hay menos placas con cardiomegalia.}};
+\end{tikzpicture}
 \end{column}
-\begin{column}{0.46\textwidth}
-\M{Del contorno al número}
-\begin{itemize}
-\item Umbral 0.5 y mayor componente conexa.
-\item ID: la fila más ancha entre bordes externos de los pulmones; su centro es la línea media $x_m$.
-\item $\text{MRD}=x_m-x_{\min}$, \ $\text{MLD}=x_{\max}-x_m$
-\[\text{ICT}=\frac{\text{MRD}+\text{MLD}}{\text{ID}}\]
-\item Si falta una estructura: \emph{no medible}.
-\end{itemize}
+\begin{column}{0.5\textwidth}
+\M{Del contorno al número}\\[0.1em]
+\centering
+\begin{tikzpicture}[font=\scriptsize, x=0.95cm, y=0.62cm]
+\draw[medir!70, fill=medir!8] (0.2,0.2) .. controls (0.0,1.6) and (0.6,3.0) .. (1.4,3.1) .. controls (2.0,3.0) and (2.3,1.5) .. (2.2,0.5) -- cycle;
+\draw[medir!70, fill=medir!8] (5.8,0.2) .. controls (6.0,1.6) and (5.4,3.0) .. (4.6,3.1) .. controls (4.0,3.0) and (3.7,1.5) .. (3.8,0.5) -- cycle;
+\draw[clasif, fill=clasif!15] (3.4,1.05) ellipse (1.35 and 0.75);
+\draw[tinta2, dashed] (3.0,-0.2) -- (3.0,3.4) node[above]{línea media $x_m$};
+\draw[{Stealth[length=1.5mm]}-{Stealth[length=1.5mm]}, tinta] (0.08,2.25) -- node[above]{ID: fila más ancha} (5.92,2.25);
+\draw[{Stealth[length=1.5mm]}-{Stealth[length=1.5mm]}, clasif, thick] (2.05,-0.15) -- node[below]{MRD} (3.0,-0.15);
+\draw[{Stealth[length=1.5mm]}-{Stealth[length=1.5mm]}, clasif, thick] (3.0,-0.15) -- node[below]{MLD} (4.75,-0.15);
+\draw[clasif!60, dotted] (2.05,1.05) -- (2.05,-0.15); \draw[clasif!60, dotted] (4.75,1.05) -- (4.75,-0.15);
+\node[text=tinta2, anchor=west] at (-0.1,-0.9) {$\leftarrow$ derecha del paciente};
+\end{tikzpicture}\\[0.2em]
+\begin{tikzpicture}[font=\scriptsize, node distance=1.8mm,
+  p/.style={fill=fondo2, rounded corners=2pt, text width=15mm, align=center, minimum height=10mm, inner sep=1.5pt},
+  flecha/.style={-{Stealth[length=1.4mm]}, color=tinta2}]
+\node[p] (p1) {Umbral 0.5 + mayor componente};
+\node[p, right=of p1] (p2) {ID y $x_m$ en la fila más ancha};
+\node[p, right=of p2] (p3) {MRD $=x_m{-}x_{\min}$\\MLD $=x_{\max}{-}x_m$};
+\node[p, right=of p3, draw=medir] (p4) {$\text{ICT}=\dfrac{\text{MRD}+\text{MLD}}{\text{ID}}$};
+\draw[flecha] (p1) -- (p2); \draw[flecha] (p2) -- (p3); \draw[flecha] (p3) -- (p4);
+\end{tikzpicture}\\[0.1em]
+\nota{Si falta una estructura, la placa queda como \emph{no medible}.}
 \end{column}
 \end{columns}
 \end{frame}
@@ -250,32 +442,45 @@ que la U-Net.
 \begin{frame}{Entrenamiento y costo}
 \bloque{Metodología}
 \begin{columns}[T]
-\begin{column}{0.56\textwidth}
-\small
+\begin{column}{0.6\textwidth}
+\centering
+\begin{tikzpicture}[font=\scriptsize, node distance=3mm and 4mm,
+  flecha/.style={-{Stealth[length=1.6mm]}, thick, color=tinta2}]
+\node[rr=medir] (a) {\textbf{E1a} U-Net\\todas las débiles};
+\node[rr=medir, right=of a] (b) {\textbf{E1b} U-Net\\solo RCA $\geq$ 0.7};
+\node[rr=medir, right=of b] (c) {\textbf{E1c} ajuste\\+ 80 humanas};
+\node[rr=clasif, below=3mm of a] (rp) {\textbf{ResNet-50}\\PA + AP};
+\node[rr=clasif, right=of rp] (rs) {\textbf{ResNet-50}\\solo PA (E4)};
+\node[rr=clasif, right=of rs] (gc) {\textbf{Grad-CAM}\\de cada ResNet};
+\draw[flecha] (b) -- (c); \draw[flecha] (rs) -- (gc);
+\node[above=0.5mm of b, text=tinta2] {cada caja $\times$ 3 semillas (0, 1, 2) $\Rightarrow$ media $\pm$ D.\,E.};
+\end{tikzpicture}\\[0.4em]
+\scriptsize
 \begin{tabular}{lccc}
 \toprule
 & U-Net & Ajuste E1c & ResNet-50 \\
 \midrule
-Épocas & 30 & 30 & 12 \\
-Lote & 16 & 8 & 32 \\
+Épocas · lote & 30 · 16 & 30 · 8 & 12 · 32 \\
 Tasa máx. & $10^{-3}$ & $2\times10^{-4}$ & $3\times10^{-4}$ \\
 Elige época por & Dice val. & Dice 20 humanas & AUC val. \\
 \bottomrule
-\end{tabular}
-
-\vspace{0.4em}
-\nota{AdamW (decaimiento $10^{-4}$), OneCycle, precisión mixta. Aumento: rotación $\pm10^\circ$, escala 0.9--1.1,
-traslación $\pm5$\,\%, brillo/contraste $\pm15$\,\%.}
+\end{tabular}\\[0.3em]
+\raggedright{\color{tinta2}\scriptsize AdamW (decaimiento $10^{-4}$), OneCycle, precisión mixta. Aumento: rotación $\pm10^\circ$,
+escala 0.9--1.1, traslación $\pm5$\,\%, brillo/contraste $\pm15$\,\%.}
 \end{column}
-\begin{column}{0.4\textwidth}
-\begin{itemize}
-\item \textbf{3 semillas} (0, 1, 2): media $\pm$ D.\,E.
-\item Umbral ResNet: Youden en validación. ICT: \textbf{0.50 clínico}, sin ajustar.
-\item La prueba no se usó para elegir nada.
-\end{itemize}
-\vspace{0.4em}
-\cifra{tinta}{4.2 h} \ {\small de GPU}\\
-\nota{Kaggle, 2 × Tesla T4. E5 y E6 en el CPU de una laptop (E5: 35.5 min).}
+\begin{column}{0.37\textwidth}
+\small\textbf{Minutos de GPU}\\ {\color{tinta2}\scriptsize Kaggle, 2 $\times$ Tesla T4}\\[0.3em]
+\begin{tikzpicture}[font=\scriptsize, x=0.022cm, y=1cm]
+\foreach \y/\v/\col/\txt in {0/62.6/medir/{Día 1: 2 U-Net + ajuste}, -0.8/150.6/medir/{Día 2: U-Net, 3 semillas}, -1.6/38.2/clasif/{Día 2: ResNet + Grad-CAM}}{
+  \fill[\col, rounded corners=1pt] (0,\y) rectangle (\v,\y-0.35);
+  \node[anchor=west] at (\v+3,\y-0.18) {\textbf{\v}};
+  \node[anchor=south west, text=tinta2, inner sep=1pt] at (0,\y) {\txt};
+}
+\end{tikzpicture}\\[0.3em]
+\cifra{tinta}{4.2 h} \ {\small de GPU}\\[0.4em]
+\scriptsize
+Umbral de la ResNet: Youden en validación. ICT: \textbf{0.50 clínico}, sin ajustar. \textbf{La prueba no se usó para
+elegir nada.} E5 y E6, en el CPU de una laptop.
 \end{column}
 \end{columns}
 \end{frame}
@@ -311,7 +516,7 @@ puntaje no codifica la vista.}
 \end{column}
 \begin{column}{0.35\textwidth}
 \begin{itemize}
-\item \C{ResNet-50}: AUC \textbf{0.892}; gana al ICT en las 3 semillas y en ambas vistas.
+\item \C{ResNet-50}: AUC \textbf{0.892}; gana en cada semilla y vista.
 \item \M{ICT}: \textbf{0.814}; supera al ICT de CheXmask sin red (0.801).
 \item Al umbral 0.50: sens.\ 0.918, esp.\ 0.504.
 \item El umbral no es el problema: Youden en validación = 0.495--0.497.
