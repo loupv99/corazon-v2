@@ -96,8 +96,10 @@ Sección~\ref{sec:dis}; la Sección~\ref{sec:con} concluye.
 
 \textbf{Medir frente a clasificar la cardiomegalia.} Sogancioglu \emph{et al.}~\cite{sogancioglu2020cardiomegaly}
 compararon en ChestX-ray14 un ICT calculado de una segmentación con un clasificador directo y encontraron ventaja para
-la segmentación, entrenada con máscaras humanas. Chamveha \emph{et al.}~\cite{chamveha2020ctr} propusieron la
-descomposición del ICT en las distancias de la línea media a cada borde del corazón, que usamos aquí. Nuestra
+la segmentación (AUC de 0.977 frente a 0.941). Su segmentación se entrenó con anotaciones de corazón y pulmón en 778
+placas, y la prueba usó 367 placas etiquetadas por dos radiólogos. Chamveha \emph{et al.}~\cite{chamveha2020ctr}
+calcularon el ICT con una U-Net a partir de la descomposición clásica en las distancias de la línea media a cada borde
+del corazón, que usamos aquí; los radiólogos aceptaron sin cambios el 76.5\,\% de sus medidas. Nuestra
 diferencia es entrenar la segmentación con máscaras automáticas a escala y medir, además, la robustez a la proyección
 y a fotos.
 
@@ -116,8 +118,9 @@ sobre la base JSRT~\cite{shiraishi2000jsrt}, y es nuestra referencia dorada.
 
 \textbf{Atajos y robustez.} Zech \emph{et al.}~\cite{zech2018confounding} mostraron que los modelos de radiografías
 pueden aprender señales del hospital o del equipo en lugar de la enfermedad; la proyección AP, típica de pacientes en
-cama, es una de esas señales. CheXphoto~\cite{phillips2020chexphoto} midió cuánto pierden los clasificadores con fotos
-de radiografías, pero no evaluó medidas geométricas como el ICT.
+cama, es una de esas señales. CheXphoto~\cite{phillips2020chexphoto} publicó fotos con celular y transformaciones
+sintéticas de radiografías para probar la robustez de los clasificadores, pero no incluye medidas geométricas como el
+ICT.
 
 % ---------------------------------------------------------------------------------------------------------------------
 \section{Metodología}\label{sec:met}
@@ -424,15 +427,17 @@ una foto real da el mismo ICT que el código de Python.
 
 La hipótesis de que medir detectaría al menos tan bien como clasificar no se sostiene: la ResNet-50 supera al ICT en
 0.078 de AUC (0.070 a 0.090 según la semilla; 0.080 en PA y 0.069 en AP), y gana en cada semilla y en cada
-vista. Vemos tres razones. Primera, el ICT reduce la placa a un
+vista. Proponemos tres explicaciones, que los datos apoyan pero no prueban. Primera, el ICT reduce la placa a un
 cociente de anchos, mientras que la ResNet-50 ve toda la imagen y puede aprovechar la forma de la silueta, los vasos
 o los hallazgos que acompañan a la cardiomegalia y, como muestra E4, la propia vista. Segunda, la etiqueta del NIH no es
 ``ICT $>0.50$'': sale del texto del informe, y al umbral clínico la mitad de las placas sin cardiomegalia lo superan
 (especificidad de 0.504; 0.377 en AP). No es un umbral mal puesto, porque el de Youden en validación cae en
 0.495--0.497; es que las distribuciones del ICT con y sin la etiqueta se solapan. El ICT mide bien una cosa que no
-coincide del todo con lo que la etiqueta llama cardiomegalia. Tercera, Sogancioglu \emph{et al.}~\cite{sogancioglu2020cardiomegaly} entrenaron la
-segmentación con máscaras humanas; la nuestra aprende de máscaras automáticas, lo que abarata la escala pero la ata a
-los sesgos de HybridGNet.
+coincide del todo con lo que la etiqueta llama cardiomegalia. Tercera, Sogancioglu \emph{et al.}~\cite{sogancioglu2020cardiomegaly}, donde la
+segmentación ganó, evaluaron con etiquetas puestas por dos radiólogos y no con las extraídas del informe, y entrenaron
+con 778 placas anotadas; la nuestra aprende de máscaras automáticas, lo que abarata la escala pero la
+ata a los sesgos de HybridGNet. Ambas diferencias son compatibles con que el resultado se invierta, pero no las
+aislamos.
 
 E1c ilustra la segunda razón. Ajustar la U-Net con 80 contornos humanos la acercó a los humanos (ICC de 0.945--0.951 a
 0.964--0.971 y sesgo casi nulo) y, aun así, bajó el AUC de 0.814 a 0.796 y la especificidad en AP de 0.377 a 0.247 al umbral de

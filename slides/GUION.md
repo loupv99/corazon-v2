@@ -38,6 +38,10 @@ Total: 1 500 s = 25 min. Ensayar con cronómetro; si se usa la app en vivo, sale
   con la prueba.
 - **¿Por qué E1c diagnostica peor si mide mejor?** La etiqueta del NIH no es "ICT > 0.50", y la mejora se midió en
   JSRT, el mismo dominio del ajuste; no aislamos cuál pesa más.
+- **Sogancioglu (2020) encontró que la segmentación gana (AUC 0.977 frente a 0.941); ¿por qué ustedes no?** Ellos
+  probaron con 367 placas etiquetadas por dos radiólogos y entrenaron con 778 placas anotadas; nosotros, con la
+  etiqueta del informe del NIH y máscaras automáticas. Las dos diferencias pueden invertir el resultado; no las
+  aislamos (cifras de su resumen, DOI 10.1109/ACCESS.2020.2995567).
 - **¿Qué se reutilizó?** ResNet-50 de ImageNet (ajustada completa), máscaras de CheXmask; la U-Net se entrenó desde
   cero (código del examen parcial del grupo).
 - **¿Por qué no Transformers?** Se plantea como trabajo futuro; la fuente de máscaras (HybridGNet) ya es una red de
