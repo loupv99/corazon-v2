@@ -1,16 +1,18 @@
-% Corazón v2 — diapositivas de la sustentación (MIA-203, Grupo 6). 23 diapositivas, 25 min.
+% Corazón v2 — diapositivas de la sustentación (MIA-203, Grupo 6), formato UNI. 23 diapositivas, 25 min.
 % Compilar desde slides/: pdflatex slides (dos veces). Figuras: python slides/figuras.py desde la raíz del repo.
 % Cada número sale de results/ (el mismo archivo que cita paper/main.tex).
-\documentclass[aspectratio=169,11pt]{beamer}
+\documentclass[aspectratio=169,10pt]{beamer}
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
-\usepackage{lmodern}
+\usepackage[sfdefault,lining]{carlito}         % métrica de Calibri (cuerpo de la plantilla UNI)
+\usepackage{caladea}                      % métrica de Cambria (subtítulos de la plantilla UNI)
 \usepackage[spanish,es-noshorthands,es-tabla,es-nodecimaldot]{babel}
 \usepackage{amsmath}
 \usepackage{booktabs}
 \usepackage{array}
 \usepackage{tikz}
 \usetikzlibrary{positioning,arrows.meta,calc}
+\usefonttheme{professionalfonts}
 
 \tikzset{
   carta/.style={draw=#1, line width=1pt, fill=white, rounded corners=4pt, text width=40mm, inner sep=6pt,
@@ -25,24 +27,51 @@
     minimum height=11mm},
   rr/.style={draw=#1, line width=0.9pt, rounded corners=3pt, fill=white, text width=22mm, align=center, inner sep=3pt,
     minimum height=10mm}}
-% --- Estilo -----------------------------------------------------------------------------------------------------------
-\definecolor{tinta}{HTML}{1F2328}
-\definecolor{tinta2}{HTML}{57606A}
-\definecolor{medir}{HTML}{2A78D6}
-\definecolor{clasif}{HTML}{EB6834}
+
+% --- Formato institucional UNI (de formato-diapo.pptx: 13.33 x 7.5 in; aquí 1 in = 1.2 cm) ---------------------------
+\definecolor{granate}{HTML}{7A1518}      % encabezado, líneas, subtítulos
+\definecolor{azuluni}{HTML}{1F3B66}      % título de portada
+\definecolor{tinta}{HTML}{222222}
+\definecolor{tinta2}{HTML}{5A5A5A}
+\definecolor{medir}{HTML}{2A78D6}        % datos: medir (U-Net / ICT); validado para daltonismo junto a clasif
+\definecolor{clasif}{HTML}{EB6834}       % datos: clasificar (ResNet-50)
 \definecolor{linea}{HTML}{D8DEE4}
 \definecolor{fondo2}{HTML}{F4F6F8}
 \setbeamercolor{normal text}{fg=tinta,bg=white}
-\setbeamercolor{frametitle}{fg=tinta}
-\setbeamercolor{structure}{fg=medir}
+\setbeamercolor{structure}{fg=granate}
 \setbeamercolor{alerted text}{fg=clasif}
-\setbeamerfont{frametitle}{size=\Large,series=\bfseries}
 \setbeamertemplate{navigation symbols}{}
-\setbeamertemplate{itemize items}{\raisebox{0.15em}{\tikz\fill[medir] (0,0) circle (0.22em);}}
-\setbeamertemplate{frametitle}{\vspace{0.6em}\insertframetitle\par\vspace{-0.15em}
-  {\color{medir}\rule{2.2em}{2pt}}\vspace{-0.3em}}
-\setbeamertemplate{footline}{\hfill{\color{tinta2}\scriptsize Corazón v2 · Grupo 6 · \insertframenumber/\inserttotalframenumber}\hspace{1.2em}\vspace{0.7em}}
-\newcommand{\bloque}[1]{{\color{tinta2}\footnotesize\textsc{#1}}\par\vspace{0.1em}}
+\setbeamertemplate{itemize items}{\raisebox{0.18em}{\tikz\fill[granate] (0,0) rectangle (0.32em,0.32em);}}
+\setbeamertemplate{enumerate items}{{\color{granate}\bfseries\insertenumlabel.}}
+\newcommand{\pie}{Corazón v2: índice cardiotorácico con U-Net frente a una CNN de caja negra · Examen Final · Grupo 6}
+
+% Encabezado y pie: logo, nombre de la universidad, línea granate de 1.5 pt arriba y de 1 pt abajo.
+\setbeamertemplate{background}{%
+  \ifnum\thepage>1
+  \begin{tikzpicture}[remember picture, overlay]
+    \node[anchor=north west, inner sep=0] at ($(current page.north west)+(0.42cm,-0.24cm)$)
+      {\includegraphics[height=0.94cm]{figs/logo_uni.png}};
+    \node[anchor=north west, inner sep=0, align=left, text=granate] at ($(current page.north west)+(1.25cm,-0.45cm)$)
+      {{\fontsize{5.2}{6}\selectfont\bfseries UNIVERSIDAD NACIONAL DE INGENIERÍA}\\[-0.5pt]
+       {\fontsize{4}{5}\selectfont FACULTAD DE INGENIERÍA DE SISTEMAS E INDUSTRIAL}};
+    \draw[granate, line width=0.75pt] ($(current page.north west)+(0.42cm,-1.24cm)$) -- ++(15.16cm,0);
+    \draw[granate, line width=0.5pt] ($(current page.south west)+(0.42cm,0.67cm)$) -- ++(15.16cm,0);
+    \node[anchor=west, inner sep=0, text=tinta2] at ($(current page.south west)+(0.42cm,0.4cm)$)
+      {\fontsize{4.3}{5}\selectfont\itshape\pie};
+    \node[anchor=east, inner sep=0, text=tinta2] at ($(current page.south east)+(-0.42cm,0.4cm)$)
+      {\fontsize{5}{6}\selectfont\insertframenumber};
+  \end{tikzpicture}%
+  \fi}
+\setbeamertemplate{headline}{\vspace*{1.62cm}}
+\setbeamertemplate{footline}{\vspace*{0.72cm}}
+% Título centrado en la caja de la plantilla (x 4.3-15.6 cm) y subtítulo-mensaje granate en Cambria (Caladea).
+\setbeamertemplate{frametitle}{%
+  \begin{tikzpicture}[remember picture, overlay]
+    \node[anchor=center, text width=11.3cm, align=center, text=tinta, font=\Large\bfseries]
+      at ($(current page.north west)+(9.97cm,-0.66cm)$) {\insertframetitle};
+    \node[anchor=center, text width=14.6cm, align=center, text=granate, font=\caladea\bfseries\normalsize]
+      at ($(current page.north west)+(8cm,-1.6cm)$) {\insertframesubtitle};
+  \end{tikzpicture}\vspace*{-0.6cm}}
 \newcommand{\cifra}[2]{{\color{#1}\fontsize{26}{28}\selectfont\bfseries #2}}
 \newcommand{\nota}[1]{{\color{tinta2}\footnotesize #1}}
 \newcommand{\M}[1]{{\color{medir}\bfseries #1}}
@@ -51,30 +80,40 @@
 \begin{document}
 
 % ======================================================================================================================
-% Portada
+% Portada (formato UNI)
 \begin{frame}[plain]
-\vspace{1.2em}
-{\color{tinta2}\small Universidad Nacional de Ingeniería · FIIS · Maestría en Inteligencia Artificial\\
-MIA-203 Redes Neuronales y Aprendizaje Profundo · Examen final}
-
-\vspace{1.4em}
-{\fontsize{28}{32}\selectfont\bfseries Medir como el radiólogo}\\[0.4em]
-{\Large Índice cardiotorácico con \M{U-Net} frente a una \C{CNN de caja negra}\\ para detectar cardiomegalia}
-
-\vspace{1.6em}
-{\color{medir}\rule{3em}{2pt}}\\[0.6em]
-\textbf{Grupo 6}\\[0.2em]
-\small Juan Sebastian Contreras Avendaño · Junior Francesco Romero Lovera · Luis Muñoz Cañabe\\
-Derly Raúl Oha Quispe · Lourdes Pedraza Palomino
-
-\vfill
-\nota{Lima, 7 de noviembre de 2026 · github.com/loupv99/corazon-v2}
+\begin{tikzpicture}[remember picture, overlay]
+  \node[anchor=north west, inner sep=0] at ($(current page.north west)+(0.76cm,-0.68cm)$)
+    {\includegraphics[height=1.92cm]{figs/logo_uni.png}};
+  \node[anchor=west, inner sep=0, align=left, text=granate, font=\fontsize{12.3}{14}\selectfont\bfseries]
+    at ($(current page.north west)+(2.88cm,-1.45cm)$) {UNIVERSIDAD NACIONAL DE INGENIERÍA};
+  \node[anchor=west, inner sep=0, align=left, text=granate, font=\fontsize{8.5}{10}\selectfont]
+    at ($(current page.north west)+(2.88cm,-1.98cm)$) {FACULTAD DE INGENIERÍA DE SISTEMAS E INDUSTRIAL};
+  \node[anchor=north, inner sep=0, text width=13.6cm, align=center, text=azuluni,
+    font=\fontsize{13.2}{16}\selectfont\bfseries\itshape]
+    at ($(current page.north west)+(8cm,-3.1cm)$)
+    {Medir como el radiólogo: índice cardiotorácico con U-Net\\ frente a una CNN de caja negra para detectar cardiomegalia};
+  \node[anchor=north, inner sep=0, text=granate, font=\fontsize{11.3}{13}\selectfont\bfseries]
+    at ($(current page.north west)+(8cm,-4.62cm)$) {Examen Final · Proyecto del curso};
+  \node[anchor=north west, inner sep=0, align=left, text=tinta, font=\fontsize{7.1}{8.8}\selectfont]
+    at ($(current page.north west)+(1.08cm,-5.35cm)$)
+    {{\color{granate}\bfseries Curso:} Redes Neuronales y Aprendizaje Profundo (MIA-203) · Maestría en Inteligencia Artificial\\
+     {\color{granate}\bfseries Autores (Grupo 6):}\\
+     Contreras Avendaño, Juan Sebastian\\
+     Romero Lovera, Junior Francesco\\
+     Muñoz Cañabe, Luis\\
+     Oha Quispe, Derly Raúl\\
+     Pedraza Palomino, Lourdes};
+  \node[anchor=south east, inner sep=0, text=tinta2, font=\fontsize{6.5}{8}\selectfont]
+    at ($(current page.south east)+(-1.08cm,0.95cm)$) {Repositorio: github.com/loupv99/corazon-v2};
+  \node[anchor=north, inner sep=0, text=granate, font=\fontsize{10.4}{12}\selectfont\bfseries]
+    at ($(current page.north west)+(8cm,-8.04cm)$) {Noviembre - 2026};
+\end{tikzpicture}
 \end{frame}
 
 % ======================================================================================================================
 % Bloque 1 — Contexto, problema, motivación y contribuciones (3 min)
-\begin{frame}{Contexto: un siglo midiendo el corazón en la placa}
-\bloque{Contexto y antecedentes}
+\begin{frame}{Contexto y antecedentes}{Del ICT de Danzer (1919) a las máscaras automáticas de CheXmask (2024)}
 \centering
 \begin{tikzpicture}[font=\scriptsize,
   hito/.style={align=center, text width=21mm, anchor=north},
@@ -107,8 +146,7 @@ radiólogos para más de 35 millones & de radiólogos y tecnólogos, en Lima & e
 MINSA, vía Panamericana (2025, 2026)}
 \end{frame}
 
-\begin{frame}{El problema: ¿el corazón está agrandado?}
-\bloque{Problema y motivación}
+\begin{frame}{Planteamiento del problema}{La cardiomegalia se sospecha con una medida que hoy depende del radiólogo}
 \begin{columns}[T]
 \begin{column}{0.55\textwidth}
 \begin{itemize}
@@ -127,8 +165,7 @@ MINSA, vía Panamericana (2025, 2026)}
 \end{columns}
 \end{frame}
 
-\begin{frame}{Pregunta, hipótesis y contribuciones}
-\bloque{Problema y motivación}
+\begin{frame}{Pregunta, hipótesis y contribuciones}{Medir como el radiólogo frente a clasificar sin explicar}
 \centering
 \begin{tikzpicture}[font=\small]
 \node[fill=fondo2, rounded corners=4pt, inner sep=7pt, text width=13.4cm, align=center] (q) {%
@@ -159,7 +196,7 @@ corregir.\\[0.3em]
 % ======================================================================================================================
 % Bloque 2 — Trabajos relacionados y fundamento teórico (3 min)
 \newcommand{\tablarel}[1]{%
-\scriptsize\renewcommand{\arraystretch}{1.2}\setlength{\tabcolsep}{4pt}%
+\footnotesize\renewcommand{\arraystretch}{1.05}\setlength{\tabcolsep}{4pt}%
 \begin{tabular}{@{}>{\raggedright}p{0.15\textwidth}>{\raggedright}p{0.2\textwidth}>{\raggedright}p{0.2\textwidth}%
 >{\raggedright}p{0.17\textwidth}>{\raggedright\arraybackslash}p{0.2\textwidth}@{}}
 \toprule
@@ -170,8 +207,7 @@ corregir.\\[0.3em]
 \bottomrule
 \end{tabular}}
 
-\begin{frame}{Trabajos relacionados (1/2): arquitecturas y datos}
-\bloque{Trabajos relacionados}
+\begin{frame}{Trabajos relacionados (1/2)}{Arquitecturas, explicación visual y datos a gran escala}
 \tablarel{%
 \textbf{Ronneberger, 2015}\\ U-Net &
 Codificador-decodificador con saltos; aumento de datos fuerte &
@@ -196,17 +232,16 @@ Su etiqueta no equivale a ICT $>$ 0.50 (esp.\ 0.504) \\
 }
 \end{frame}
 
-\begin{frame}{Trabajos relacionados (2/2): cardiomegalia y robustez}
-\bloque{Trabajos relacionados}
+\begin{frame}{Trabajos relacionados (2/2)}{Cardiomegalia, máscaras anatómicas y robustez}
 \tablarel{%
 \textbf{Sogancioglu, 2020} &
-Segmentación (778 anotadas) vs.\ clasificación (65\,000) &
-AUC 0.977 frente a 0.941, en 367 placas etiquetadas por 2 radiólogos &
+Segmentar (778 anotadas) vs.\ clasificar (65\,000) &
+AUC 0.977 vs.\ 0.941 (367 placas, 2 radiólogos) &
 Medir gana con 100 veces menos anotaciones &
 Etiqueta del informe y \M{máscaras automáticas}: gana clasificar \\
 \textbf{Chamveha, 2020} &
-U-Net con VGG16; ICT $=(\text{MRD}+\text{MLD})/\text{ID}$ &
-Radiólogos aceptan sin cambios el 76.5\,\% de las medidas &
+U-Net + VGG16; ICT $=(\text{MRD}+\text{MLD})/\text{ID}$ &
+76.5\,\% de medidas aceptadas sin cambios &
 ICT automático usable en el informe &
 \M{MRD y MLD por separado} (E6); vista AP y fotos \\
 \textbf{Gaggion, 2023--24}\\ HybridGNet, CheXmask &
@@ -214,16 +249,15 @@ Conv.\ + grafos; 657\,566 máscaras &
 Contornos plausibles donde otros modelos fallan &
 Máscaras anatómicas a gran escala &
 Las \M{destilamos en una U-Net} para el navegador \\
-\textbf{Zech, 2018}; \textbf{Phillips, 2020} (CheXphoto) &
-CNN en 3 hospitales (158\,323 placas); fotos con celular y sintéticas &
-La CNN reconoce el hospital (99.95\,\%, NIH); CheXphoto: conjunto de robustez &
+\textbf{Zech, 2018}; \textbf{Phillips, 2020} &
+CNN en 3 hospitales (158\,323 placas); fotos con celular &
+Reconoce el hospital (99.95\,\%, NIH); CheXphoto: robustez &
 Atajos del origen; escenario de fotos &
 Atajo de la \C{vista AP} en ambos enfoques; fotos propias con ArUco \\
 }
 \end{frame}
 
-\begin{frame}{Fundamento: por qué estas dos arquitecturas}
-\bloque{Fundamento teórico}
+\begin{frame}{Fundamento teórico}{Una red que localiza bordes frente a una que resume toda la placa}
 \begin{columns}[T]
 \begin{column}{0.49\textwidth}
 \M{U-Net — medir}\\[0.2em]
@@ -280,8 +314,7 @@ $L=\mathrm{ReLU}\big(\sum_k \alpha_k A^k\big)$, \ $\alpha_k=\frac{1}{Z}\sum_{i,j
 
 % ======================================================================================================================
 % Bloque 3 — Datos y metodología (6 min)
-\begin{frame}{Preparación de datos: de cuatro fuentes a un mismo formato}
-\bloque{Datos}
+\begin{frame}{Preparación de datos}{Cuatro fuentes llevadas a un mismo formato de 256 px}
 \vspace{0.4em}
 \centering
 \begin{tikzpicture}[font=\scriptsize, x=1cm, y=1cm,
@@ -307,8 +340,7 @@ $L=\mathrm{ReLU}\big(\sum_k \alpha_k A^k\big)$, \ $\alpha_k=\frac{1}{Z}\sum_{i,j
 \nota{Salida común: arrays de 256 px (pulmón derecho, izquierdo, corazón) + una tabla por placa. Una sola vez, $\sim$20 min en Kaggle.}
 \end{frame}
 
-\begin{frame}{Datos: tres fuentes, una partición sin fuga}
-\bloque{Datos}
+\begin{frame}{Datos}{8\,776 placas con partición por paciente; la vista está asociada a la etiqueta}
 \begin{columns}[T]
 \begin{column}{0.5\textwidth}
 \small
@@ -347,10 +379,9 @@ Prueba (oficial NIH) & 2\,354 & 1\,069 & 1\,335 \\
 \end{columns}
 \end{frame}
 
-\begin{frame}{Etiquetas débiles, referencia humana}
-\bloque{Datos}
+\begin{frame}{Etiquetas débiles y referencia humana}{La U-Net aprende de máscaras automáticas y se evalúa contra contornos humanos}
 \centering
-\includegraphics[width=0.72\textwidth]{../results/kaggle-v1/control_scr.png}\\[0.1em]
+\includegraphics[width=0.6\textwidth]{../results/kaggle-v1/control_scr.png}\\[0.1em]
 \nota{Contornos humanos de SCR rasterizados (azul: pulmón derecho; verde: izquierdo; rojo: corazón)}\\[0.5em]
 \begin{tikzpicture}[font=\scriptsize, node distance=8mm,
   flecha/.style={-{Stealth[length=2mm]}, thick, color=tinta2}]
@@ -365,8 +396,7 @@ Prueba (oficial NIH) & 2\,354 & 1\,069 & 1\,335 \\
 izquierda del paciente.}
 \end{frame}
 
-\begin{frame}{Arquitectura del sistema}
-\bloque{Metodología}
+\begin{frame}{Arquitectura del sistema}{Dos caminos para la misma radiografía}
 \centering
 \begin{tikzpicture}[font=\small, node distance=5mm and 6mm,
   caja/.style={draw=linea, fill=fondo2, rounded corners=3pt, align=center, inner sep=4pt, minimum height=11mm, text width=26mm},
@@ -395,8 +425,7 @@ que la U-Net.
 \end{columns}
 \end{frame}
 
-\begin{frame}{Formulación: pérdida y medida}
-\bloque{Metodología}
+\begin{frame}{Formulación}{De la pérdida de segmentación al índice cardiotorácico}
 \begin{columns}[T]
 \begin{column}{0.48\textwidth}
 \begin{tikzpicture}[font=\footnotesize]
@@ -439,8 +468,7 @@ que la U-Net.
 \end{columns}
 \end{frame}
 
-\begin{frame}{Entrenamiento y costo}
-\bloque{Metodología}
+\begin{frame}{Entrenamiento y costo computacional}{Cinco configuraciones, tres semillas y 4.2 h de GPU}
 \begin{columns}[T]
 \begin{column}{0.6\textwidth}
 \centering
@@ -485,8 +513,7 @@ elegir nada.} E5 y E6, en el CPU de una laptop.
 \end{columns}
 \end{frame}
 
-\begin{frame}{Diseño experimental}
-\bloque{Metodología}
+\begin{frame}{Diseño experimental}{Seis experimentos, cada uno ligado a una contribución}
 \small
 \begin{tabular}{p{0.2\textwidth}p{0.4\textwidth}p{0.3\textwidth}}
 \toprule
@@ -508,8 +535,7 @@ puntaje no codifica la vista.}
 
 % ======================================================================================================================
 % Bloque 4 — Resultados (7 min)
-\begin{frame}{Resultado 1: la caja negra detecta mejor}
-\bloque{Resultados · línea base}
+\begin{frame}{Resultado 1: línea base}{La caja negra detecta mejor: AUC 0.892 frente a 0.814}
 \begin{columns}[c]
 \begin{column}{0.62\textwidth}
 \includegraphics[width=\textwidth]{figs/auc_metodos.png}
@@ -525,8 +551,7 @@ puntaje no codifica la vista.}
 \end{columns}
 \end{frame}
 
-\begin{frame}{Resultado 2: mide bien, aun sin contornos humanos}
-\bloque{Resultados · ablación y acuerdo clínico}
+\begin{frame}{Resultado 2: acuerdo con contornos humanos}{Sin un solo contorno humano, la U-Net mide con ICC 0.945--0.951}
 \begin{center}\small
 \begin{tabular}{lcccc}
 \toprule
@@ -554,8 +579,7 @@ el mismo dominio del ajuste.}
 \end{columns}
 \end{frame}
 
-\begin{frame}{Resultado 3: el atajo de la proyección AP}
-\bloque{Resultados · comparación controlada}
+\begin{frame}{Resultado 3: el atajo de la proyección AP}{Ambos enfoques pierden en AP; solo el ICT se corrige con una fórmula}
 \begin{columns}[c]
 \begin{column}{0.6\textwidth}
 \includegraphics[width=\textwidth]{figs/vista_pa_ap.png}
@@ -573,8 +597,7 @@ el mismo dominio del ajuste.}
 \end{columns}
 \end{frame}
 
-\begin{frame}{Resultado 4: 300 fotos con celular}
-\bloque{Resultados · datos propios}
+\begin{frame}{Resultado 4: fotos con celular}{El ICT cambia de decisión en menos placas y solo cerca del umbral}
 \begin{columns}[c]
 \begin{column}{0.4\textwidth}
 \includegraphics[width=\textwidth]{figs/foto_inclinada.jpg}\\
@@ -584,7 +607,7 @@ el mismo dominio del ajuste.}
 \small AUC: ambos pierden 0.02--0.03.
 \end{column}
 \begin{column}{0.57\textwidth}
-\includegraphics[width=\textwidth]{figs/fotos_cambios.png}
+\includegraphics[height=0.5\textheight]{figs/fotos_cambios.png}
 \begin{itemize}\small
 \item El \M{ICT} cambia de decisión solo cerca del umbral: mediana a \textbf{0.013} de 0.50 (0.056 en todas).
 \item Las degradaciones sintéticas \emph{subestimaron} el efecto real.
@@ -593,8 +616,7 @@ el mismo dominio del ajuste.}
 \end{columns}
 \end{frame}
 
-\begin{frame}{La aplicación: medir en el celular, sin enviar la imagen}
-\bloque{Resultados · implementación}
+\begin{frame}{La aplicación}{Medir en el celular, sin enviar la imagen}
 \begin{columns}[c]
 \begin{column}{0.5\textwidth}
 \centering
@@ -614,8 +636,7 @@ el mismo dominio del ajuste.}
 
 % ======================================================================================================================
 % Bloque 5 — Interpretabilidad, discusión, limitaciones e impacto (4 min)
-\begin{frame}{Grad-CAM mira al corazón, también cuando falla}
-\bloque{Interpretabilidad}
+\begin{frame}{Interpretabilidad: Grad-CAM}{El mapa mira al corazón, también cuando la red se equivoca}
 \begin{columns}[c]
 \begin{column}{0.56\textwidth}
 \includegraphics[width=\textwidth]{figs/gradcam_4.png}\\[-0.1em]
@@ -634,8 +655,7 @@ el mismo dominio del ajuste.}
 \end{columns}
 \end{frame}
 
-\begin{frame}{Discusión: explicar no es lo mismo que medir}
-\bloque{Discusión}
+\begin{frame}{Discusión}{Explicar no es lo mismo que medir}
 \begin{columns}[T]
 \begin{column}{0.48\textwidth}
 \C{Por qué gana la caja negra}
@@ -662,8 +682,7 @@ la placa lateral.
 \end{block}
 \end{frame}
 
-\begin{frame}{Limitaciones, sesgos e impacto}
-\bloque{Responsabilidad}
+\begin{frame}{Limitaciones, sesgos e impacto}{Una herramienta de apoyo, no un diagnóstico}
 \begin{columns}[T]
 \begin{column}{0.5\textwidth}
 \textbf{Limitaciones y sesgos}
@@ -689,8 +708,7 @@ la placa lateral.
 
 % ======================================================================================================================
 % Bloque 6 — Conclusiones y trabajo futuro (2 min)
-\begin{frame}{Conclusiones y trabajo futuro}
-\bloque{Conclusiones}
+\begin{frame}{Conclusiones y trabajo futuro}{Lo valioso es qué error puede revisar quien usa la herramienta}
 \begin{columns}[T]
 \begin{column}{0.52\textwidth}
 \begin{itemize}

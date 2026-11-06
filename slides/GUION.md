@@ -1,6 +1,8 @@
 # Guion de la sustentación (25 min + 5 de preguntas)
 
-`slides.pdf` = 23 diapositivas (el enunciado *sugiere* 15–20; lo estricto son los 25 min). Compilar: `python slides/figuras.py` (desde la raíz) y luego, en `slides/`,
+`slides.pdf` = 23 diapositivas (el enunciado *sugiere* 15–20; lo estricto son los 25 min), con el formato
+institucional UNI de `formato-diapo.pptx` (escudo, granate, Calibri/Cambria vía Carlito/Caladea; logo en
+`figs/logo_uni.png`). Compilar: `python slides/figuras.py` (desde la raíz) y luego, en `slides/`,
 `pdflatex slides` dos veces. Las cifras salen de `results/` (las mismas del artículo).
 
 La columna **Expone** la llena el equipo: todos exponen y el jurado puede preguntar a cualquiera sobre cualquier parte.
