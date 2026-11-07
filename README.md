@@ -31,6 +31,7 @@ src/
   e5.py            E5: ICT y ResNet sobre fotos y sintéticas frente a la original (CPU)
   e6.py            E6: el lado derecho del ICT (MRD) en fracción del tórax y en cm, en aciertos y errores
   exportar_onnx.py U-Net -> ONNX para la app, con verificación contra PyTorch
+  calidad.py       detector de baja calidad de la app: umbrales calibrados con las placas y fotos de E5
 app/               app web: mide el ICT en el navegador (ver app/LEEME.md)
 paper/             artículo IEEE (main.tex + refs.bib; ver paper/LEEME.md)
 slides/            diapositivas Beamer; figuras: python slides/figuras.py (ver slides/GUION.md)
