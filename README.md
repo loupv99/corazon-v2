@@ -1,4 +1,4 @@
-# Corazón v2 — medir el índice cardiotorácico como el radiólogo
+# PROYECTO — medir el índice cardiotorácico como el radiólogo
 
 Proyecto final de MIA-203 Redes Neuronales y Aprendizaje Profundo (UNI FIIS, 2026-II).
 
