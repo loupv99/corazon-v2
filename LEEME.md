@@ -32,7 +32,10 @@ Para subir en la demo hay además dos placas de la selección de E5 (2026-11-07,
 `python -m src.dicom --sel e5_seleccion --imagenes 00028509_016.png 00028445_000.png`):
 `ejemplos/demo_AP_con_cardiomegalia.dcm` (00028509_016, AP: la app pone AP y avisa de la magnificación; ICT 0,63,
 MRD 8,5 · MLD 11,4 · ID 31,7 cm) y `ejemplos/demo_PA_sin_cardiomegalia.dcm` (00028445_000, PA; ICT 0,38,
-2,9 · 7,3 · 26,8 cm). Verificadas en Chrome; los cm coinciden con la tabla de E1b semilla 1.
+2,9 · 7,3 · 26,8 cm). Con `--imagenes 00023033_014.png 00014635_004.png` se completan las cuatro combinaciones:
+`ejemplos/demo_AP_sin_cardiomegalia.dcm` (00023033_014, AP; ICT 0,44, 3,6 · 10,2 · 31,4 cm) y
+`ejemplos/demo_PA_con_cardiomegalia.dcm` (00014635_004, PA; ICT 0,65, 8,0 · 12,6 · 31,8 cm). Las cuatro verificadas
+en Chrome; los cm coinciden con la tabla de E1b semilla 1.
 
 **Detector de baja calidad** (2026-11-06; `src/calidad.py`, `results/calidad/LEEME.md`). Sobre la imagen de 256 px y
 la salida de la red calcula contraste, nitidez, exposición, incertidumbre de la red y estructuras cortadas por el
