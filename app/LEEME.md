@@ -28,6 +28,11 @@ imagen de 8 bits del NIH y su tamaño de píxel; **no** son los estudios origina
 horizontal porque el NIH estiró las placas a 1 024 × 1 024 y solo se usan anchos). Verificado en Chrome el 2026-11-06:
 ejemplo «con» 0,52 con MRD 4,9 · MLD 13,3 · ID 35,0 cm (tabla de E1b semilla 1: 4,91 · 13,35 · 34,98); «sin» 0,45
 con 4,1 · 10,3 · 32,3 cm; un DICOM de prueba de 16 bits MONOCHROME1 dio 0,52 (MLD 86 px en vez de 87 por la ventana).
+Para subir en la demo hay además dos placas de la selección de E5 (2026-11-07,
+`python -m src.dicom --sel e5_seleccion --imagenes 00028509_016.png 00028445_000.png`):
+`ejemplos/demo_AP_con_cardiomegalia.dcm` (00028509_016, AP: la app pone AP y avisa de la magnificación; ICT 0,63,
+MRD 8,5 · MLD 11,4 · ID 31,7 cm) y `ejemplos/demo_PA_sin_cardiomegalia.dcm` (00028445_000, PA; ICT 0,38,
+2,9 · 7,3 · 26,8 cm). Verificadas en Chrome; los cm coinciden con la tabla de E1b semilla 1.
 
 **Detector de baja calidad** (2026-11-06; `src/calidad.py`, `results/calidad/LEEME.md`). Sobre la imagen de 256 px y
 la salida de la red calcula contraste, nitidez, exposición, incertidumbre de la red y estructuras cortadas por el
