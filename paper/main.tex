@@ -412,12 +412,15 @@ La U-Net se exportó a ONNX (31~MB) y se verificó contra PyTorch: la diferencia
 $2.5\times10^{-6}$ y el 100\,\% de los píxeles coincidió. La aplicación web corre en el navegador sin enviar la
 imagen (Fig.~\ref{fig:app}). En una laptop, una medición tarda de 1.7 a 3.2~s. Para una foto, el usuario marca las
 cuatro esquinas de la radiografía; las líneas de la medida se pueden arrastrar para corregirla. En dos ejemplos y en
-una foto real da el mismo ICT que el código de Python.
+una foto real da el mismo ICT que el código de Python. La aplicación avisa cuando la imagen es de baja calidad: el
+criterio que predijo error en E5 fue la incertidumbre de la red (umbral = percentil 99 de las 100 placas
+originales). De las 300 fotos corregidas, avisó en 25, y en ellas el ICT cambió de lado del 0.50 en el 20\,\% frente
+al 2.9\,\% en el resto.
 
 \begin{figure}[t]
 \centering
 \includegraphics[width=\linewidth]{figs/app.png}
-\caption{Aplicación web: contornos de la U-Net, línea media, bordes del corazón y del tórax, e ICT.}\label{fig:app}
+\caption{Aplicación web: contornos de la U-Net, línea media, bordes del corazón y del tórax, ICT y aviso de calidad.}\label{fig:app}
 \end{figure}
 
 % ---------------------------------------------------------------------------------------------------------------------

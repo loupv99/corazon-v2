@@ -617,17 +617,20 @@ el mismo dominio del ajuste.}
 \end{frame}
 
 \begin{frame}{La aplicación}{Medir en el celular, sin enviar la imagen}
-\begin{columns}[c]
-\begin{column}{0.5\textwidth}
 \centering
-\includegraphics[height=0.78\textheight]{../paper/figs/app.png}
-\end{column}
-\begin{column}{0.46\textwidth}
-\begin{itemize}
+\vspace*{6pt}\includegraphics[width=0.6\textwidth]{../paper/figs/app.png}\par\vspace{-4pt}
+\begin{columns}[t]
+\begin{column}{0.47\textwidth}
+\begin{itemize}\footnotesize
 \item U-Net exportada a \textbf{ONNX} (31 MB), corre en el navegador.
-\item Verificada contra PyTorch: dif.\ máx.\ $2.5\times10^{-6}$; 100\,\% de píxeles iguales; mismo ICT que Python.
+\item Verificada contra PyTorch: dif.\ máx.\ $2.5\times10^{-6}$; mismo ICT que Python.
 \item Para fotos: el usuario marca 4 esquinas y se endereza.
-\item Las líneas se \textbf{arrastran}: el médico corrige la medida y el ICT cambia.
+\end{itemize}
+\end{column}
+\begin{column}{0.47\textwidth}
+\begin{itemize}\footnotesize
+\item \textbf{Corregir bordes}: el médico arrastra los bordes y el ICT cambia.
+\item \textbf{Aviso de calidad} (incertidumbre de la red): fotos avisadas cambian de decisión 20\,\% vs.\ 2.9\,\%.
 \item 1.7--3.2 s por medición en una laptop.
 \end{itemize}
 \end{column}
