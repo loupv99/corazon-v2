@@ -34,6 +34,7 @@ src/
   e6.py            E6: el lado derecho del ICT (MRD) en fracción del tórax y en cm, en aciertos y errores
   exportar_onnx.py U-Net -> ONNX para la app, con verificación contra PyTorch
   calidad.py       detector de baja calidad de la app: umbrales calibrados con las placas y fotos de E5
+  dicom.py         placas de ejemplo -> DICOM (captura secundaria) con proyección y tamaño de píxel, para la app
 app/               app web: mide el ICT en el navegador (ver app/LEEME.md)
 paper/             artículo IEEE (main.tex + refs.bib; ver paper/LEEME.md)
 slides/            diapositivas Beamer; figuras: python slides/figuras.py (ver slides/GUION.md)

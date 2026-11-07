@@ -208,7 +208,7 @@
       <div class="zona" id="zona">
         <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><rect x="3" y="3" width="18" height="18" rx="1"/><circle cx="9" cy="9" r="2"/><path d="M21 15l-5-5-9 9"/><path d="M15 21v-6m0 0l-2.5 2.5M15 15l2.5 2.5"/></svg>
         <h3>Arrastre y suelte una radiografía aquí</h3>
-        <p>PNG / JPG · radiografía de tórax frontal completa</p>
+        <p>PNG / JPG / DICOM · radiografía de tórax frontal completa</p>
         <div class="botones">
           <label class="btn prim" for="archivo" tabindex="0">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 16V4m0 0l-4 4m4-4l4 4M4 16v4h16v-4"/></svg>
@@ -217,14 +217,14 @@
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>
             Tomar foto</label>
         </div>
-        <input id="archivo" type="file" accept="image/*">
+        <input id="archivo" type="file" accept="image/*,.dcm,.dicom,application/dicom">
         <input id="camara" type="file" accept="image/*" capture="environment">
         <label class="chk"><input type="checkbox" id="es-foto">
           <span>Es una foto de un negatoscopio o de un monitor: marcaré las cuatro esquinas para enderezarla.</span></label>
-        <div class="ejemplos">Abrir ejemplo: <button id="ej-con">con cardiomegalia</button> · <button id="ej-sin">sin cardiomegalia</button></div>
+        <div class="ejemplos">Abrir ejemplo: <button id="ej-con">con cardiomegalia</button> · <button id="ej-sin">sin cardiomegalia</button> · <button id="ej-dcm">DICOM (mide en cm)</button></div>
       </div>
       <div class="guias">
-        <div><h4>Archivo de Telesalud</h4><p>Use la imagen original. Incluya ambos pulmones y el contorno cardíaco completo.</p></div>
+        <div><h4>Archivo de Telesalud</h4><p>Use la imagen original; si es DICOM y trae el tamaño del píxel, las medidas salen también en cm. Incluya ambos pulmones y el contorno cardíaco completo.</p></div>
         <div><h4>Foto de negatoscopio o monitor</h4><p>Evite reflejos. Marque las cuatro esquinas para enderezar la imagen antes de medir.</p></div>
       </div>
     </div>
@@ -268,7 +268,7 @@
     <aside class="panel">
       <!-- Medición -->
       <div id="p-medicion" class="oculto">
-        <div class="ict-fila"><h3>Resultado de la medición</h3><span class="nota" style="margin:0">Unidad: píxeles</span></div>
+        <div class="ict-fila"><h3>Resultado de la medición</h3><span class="nota" style="margin:0" id="unidad">Unidad: píxeles</span></div>
         <div class="etq" style="margin-top:6px">Índice cardiotorácico</div>
         <div class="ict-fila">
           <div class="ict-num mono" id="ict">–</div>
@@ -367,12 +367,14 @@
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web@1.20.1/dist/ort.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dicom-parser@1.8.21/dist/dicomParser.min.js"></script>
 <script>
 "use strict";
 const S = 256, LADO_FOTO = 900;          // como src/fotos.py: la foto enderezada mide 900 px antes de reducirla
 const $ = id => document.getElementById(id);
 let sesion = null, imagenFuente = null, esquinas = [], medida = null, auto = null, vista = null;
 let entrada = null, editando = false, zoom = 1, inclinada = false;
+let escala = null;          // DICOM con tamaño de píxel: { mm: mm por píxel en la imagen de 256 px, fuente } ; si no, null
 const datos = { proy: "PA" };
 
 // ================================================================ cálculo (sin cambios: verificado contra Python)
@@ -539,6 +541,7 @@ function calidad(g, p) {
     $("medir-carga").disabled = false;
     const ej = new URLSearchParams(location.search).get("ejemplo");   // ?ejemplo=con o ?ejemplo=sin abre directo
     if ((ej === "con" || ej === "sin") && !entrada) cargar(`ejemplos/${ej}_cardiomegalia.png`, false);
+    else if (ej === "dicom" && !entrada) ejemploDicom();
     else if (entrada && !$("p-carga").classList.contains("oculto")) medirEntrada();
   } catch (e) {
     $("error-tit").textContent = "No se pudo preparar el modelo";
@@ -589,13 +592,13 @@ function resumen() {
 function cargar(src, esFoto) {
   const img = new Image();
   img.onload = () => {
-    imagenFuente = aGris(img); inclinada = false; medida = auto = vista = null; editando = false;
+    imagenFuente = aGris(img); inclinada = false; medida = auto = vista = null; editando = false; escala = null;
     entrada = esFoto ? null : imagenFuente; esquinas = []; zoom = 1; $("caja").classList.remove("zoom");
     if (esFoto) { mostrarPanel("esquinas"); pintarFoto(); return; }
     medirEntrada();
   };
   img.onerror = () => { $("error-tit").textContent = "No se pudo abrir la imagen";
-    $("error-txt").textContent = "Use PNG o JPG. Si es una foto HEIC del iPhone: Ajustes > Cámara > Formatos > Más compatible.";
+    $("error-txt").textContent = "Use PNG, JPG o DICOM. Si es una foto HEIC del iPhone: Ajustes > Cámara > Formatos > Más compatible.";
     vista = null; mostrarPanel("error"); dibujarSoloImagen(null); };
   img.src = src;
 }
@@ -609,20 +612,86 @@ async function medirEntrada() {
     mostrarPanel("error"); dibujarSoloImagen(entrada); return; }
   avisoVisor(); mostrarPanel("medicion"); dibujar();
 }
+// ---------------------------------------------------------------- DICOM sin compresión (src/dicom.py hace los de ejemplo)
+// 8 bits: los valores se usan tal cual (mismo ICT que el PNG). 12-16 bits: ventana del propio archivo (o mínimo-máximo).
+// Tamaño del píxel: PixelSpacing (0028,0030); si falta, ImagerPixelSpacing (0018,1164), que está en el detector y no
+// corrige la magnificación. mm por píxel a 256 px = espaciado de columna x ancho / 256, como src/prepare_data.py.
+const SIN_COMPRESION = ["1.2.840.10008.1.2", "1.2.840.10008.1.2.1"];
+async function esDicom(f) {
+  const b = new Uint8Array(await f.slice(128, 132).arrayBuffer());
+  return String.fromCharCode(...b) === "DICM" || /\.(dcm|dicom)$/i.test(f.name || "");
+}
+function leerDicom(buf) {
+  const ds = dicomParser.parseDicom(new Uint8Array(buf));
+  const ts = (ds.string("x00020010") || "1.2.840.10008.1.2").trim();
+  if (!SIN_COMPRESION.includes(ts)) throw new Error("el DICOM está comprimido (" + ts + "); expórtelo sin compresión");
+  const w = ds.uint16("x00280011"), h = ds.uint16("x00280010"), bits = ds.uint16("x00280100");
+  const foto = (ds.string("x00280004") || "MONOCHROME2").trim(), el = ds.elements.x7fe00010;
+  if ((ds.uint16("x00280002") || 1) !== 1 || !foto.startsWith("MONOCHROME")) throw new Error("se espera una imagen en escala de grises");
+  if (!el || !w || !h) throw new Error("el archivo no trae imagen");
+  const n = w * h, v = new Float32Array(n), conSigno = ds.uint16("x00280103") === 1;
+  const dv = new DataView(ds.byteArray.buffer, ds.byteArray.byteOffset + el.dataOffset);
+  for (let i = 0; i < n; i++) v[i] = bits === 8 ? dv.getUint8(i) : conSigno ? dv.getInt16(2 * i, true) : dv.getUint16(2 * i, true);
+  const pend = ds.floatString("x00281053") ?? 1, inter = ds.floatString("x00281052") ?? 0;
+  const g = new Float32Array(n);
+  if (bits === 8 && pend === 1 && inter === 0) g.set(v);
+  else {
+    for (let i = 0; i < n; i++) v[i] = v[i] * pend + inter;
+    let c = ds.floatString("x00281050"), a = ds.floatString("x00281051");
+    if (!(a > 1)) { let lo = Infinity, hi = -Infinity; for (const x of v) { if (x < lo) lo = x; if (x > hi) hi = x; } c = (lo + hi) / 2; a = Math.max(2, hi - lo); }
+    for (let i = 0; i < n; i++) g[i] = Math.min(255, Math.max(0, ((v[i] - (c - 0.5)) / (a - 1) + 0.5) * 255));
+  }
+  if (foto === "MONOCHROME1") for (let i = 0; i < n; i++) g[i] = 255 - g[i];
+  let esp = ds.string("x00280030"), fuente = "PixelSpacing";
+  if (!esp) { esp = ds.string("x00181164"); fuente = "ImagerPixelSpacing"; }
+  const mmCol = esp ? parseFloat(esp.split("\\")[1] ?? esp) : NaN;
+  const edad = (ds.string("x00101010") || "").match(/^0*(\d+)Y$/), sexo = (ds.string("x00100040") || "").trim();
+  const fecha = (ds.string("x00080020") || "").match(/^(\d{4})(\d{2})(\d{2})$/);
+  return { gris: { g, w, h }, mmCol: mmCol > 0 ? mmCol : null, fuente, vista: (ds.string("x00185101") || "").trim(),
+           edad: edad ? edad[1] : "", sexo: sexo === "F" ? "Femenino" : sexo === "M" ? "Masculino" : "",
+           fecha: fecha ? `${fecha[3]}/${fecha[2]}/${fecha[1]}` : "" };
+}
+function cargarDicom(buf) {
+  let d;
+  try { d = leerDicom(buf); }
+  catch (e) {
+    $("error-tit").textContent = "No se pudo leer el DICOM";
+    $("error-txt").textContent = (e && e.message ? e.message : String(e)) + ".";
+    vista = null; mostrarPanel("error"); dibujarSoloImagen(null); return;
+  }
+  imagenFuente = entrada = d.gris; inclinada = false; medida = auto = vista = null; editando = false;
+  esquinas = []; zoom = 1; $("caja").classList.remove("zoom");
+  escala = d.mmCol ? { mm: d.mmCol * d.gris.w / S, fuente: d.fuente } : null;
+  if (d.edad && !$("d-edad").value) $("d-edad").value = d.edad;       // solo completa lo que está vacío
+  if (d.sexo && !$("d-sexo").value) $("d-sexo").value = d.sexo;
+  if (d.fecha && !$("d-fecha").value) $("d-fecha").value = d.fecha;
+  if (d.vista === "PA" || d.vista === "AP") proyeccion(d.vista); else resumen();
+  medirEntrada();
+}
+async function abrirArchivo(f, foto) {
+  if (await esDicom(f)) cargarDicom(await f.arrayBuffer());     // un DICOM nunca es una foto: se mide directo
+  else cargar(URL.createObjectURL(f), foto);
+}
 function desdeArchivo(ev, foto) {
   const f = ev.target.files[0]; ev.target.value = "";
-  if (f) cargar(URL.createObjectURL(f), foto || $("es-foto").checked);
+  if (f) abrirArchivo(f, foto || $("es-foto").checked);
+}
+function ejemploDicom() {
+  fetch("ejemplos/con_cardiomegalia.dcm").then(r => { if (!r.ok) throw new Error("HTTP " + r.status); return r.arrayBuffer(); })
+    .then(cargarDicom).catch(e => { $("error-tit").textContent = "No se pudo abrir el DICOM de ejemplo";
+      $("error-txt").textContent = e.message; mostrarPanel("error"); });
 }
 $("archivo").addEventListener("change", ev => desdeArchivo(ev, false));
 $("camara").addEventListener("change", ev => desdeArchivo(ev, true));
 for (const l of document.querySelectorAll("label[for]")) l.addEventListener("keydown", ev => { if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); $(l.htmlFor).click(); } });
 $("ej-con").addEventListener("click", () => cargar("ejemplos/con_cardiomegalia.png", false));
 $("ej-sin").addEventListener("click", () => cargar("ejemplos/sin_cardiomegalia.png", false));
+$("ej-dcm").addEventListener("click", ejemploDicom);
 const zona = $("zona");
 zona.addEventListener("dragover", ev => { ev.preventDefault(); zona.classList.add("encima"); });
 zona.addEventListener("dragleave", () => zona.classList.remove("encima"));
 zona.addEventListener("drop", ev => { ev.preventDefault(); zona.classList.remove("encima");
-  const f = ev.dataTransfer.files[0]; if (f && f.type.startsWith("image/")) cargar(URL.createObjectURL(f), $("es-foto").checked); });
+  const f = ev.dataTransfer.files[0]; if (f) abrirArchivo(f, $("es-foto").checked); });
 $("medir-carga").addEventListener("click", medirEntrada);
 $("reintentar").addEventListener("click", () => { if (entrada) medirEntrada(); else if (imagenFuente) { mostrarPanel("esquinas"); pintarFoto(); } else mostrarInicio(); });
 $("otra").addEventListener("click", mostrarInicio);
@@ -701,12 +770,15 @@ function alturaCorazon() {
 // ================================================================ panel de resultado
 const fmt = v => v.toFixed(2).replace(".", ",");
 const fmtPx = v => (Number.isInteger(v) ? v : v.toFixed(1).replace(".", ",")) + " px";
+const fmtCm = px => (px * escala.mm / 10).toFixed(1).replace(".", ",") + " cm";
+const conCm = px => escala ? `${fmtPx(px)} · ${fmtCm(px)}` : fmtPx(px);
 function editada() { return !!(auto && medida && ["tIzq", "tDer", "cIzq", "cDer"].some(k => medida[k] !== auto[k])); }
 function pintarPanel() {
   if (!medida) return;
   const r = indices(medida), ed = editada();
   $("ict").textContent = fmt(r.ict);
-  $("lado-id").textContent = "ID " + fmtPx(r.idPx);
+  $("lado-id").textContent = "ID " + conCm(r.idPx);
+  $("unidad").textContent = escala ? "Unidad: píxeles y cm (DICOM)" : "Unidad: píxeles";
   const alta = r.ict > 0.5, lec = $("lectura");
   lec.className = "lectura " + (alta ? "alta" : "normal");
   lec.textContent = r.ict > 1 ? "Medida no válida: revise los bordes o use otra imagen"
@@ -720,7 +792,7 @@ function pintarPanel() {
   const pos = v => Math.max(0, Math.min(1, (v - 0.35) / 0.35)) * 100;
   $("umbral").style.left = pos(0.5) + "%"; $("riel-alto").style.left = pos(0.5) + "%";
   $("valor").style.left = pos(r.ict) + "%"; $("valor-txt").textContent = fmt(r.ict);
-  $("v-mrd").textContent = fmtPx(r.mrdPx); $("v-mld").textContent = fmtPx(r.mldPx); $("v-id").textContent = fmtPx(r.idPx);
+  $("v-mrd").textContent = conCm(r.mrdPx); $("v-mld").textContent = conCm(r.mldPx); $("v-id").textContent = conCm(r.idPx);
   $("informe").textContent = textoInforme(r, ed);
   $("corregir").textContent = editando ? "Finalizar ajuste" : "Corregir bordes";
   if (!$("p-medicion").classList.contains("oculto")) {
@@ -728,7 +800,11 @@ function pintarPanel() {
   }
 }
 function textoInforme(r, ed) {
-  return `ICT ${fmt(r.ict)} (MRD ${fmtPx(r.mrdPx)}, MLD ${fmtPx(r.mldPx)}, ID ${fmtPx(r.idPx)}; imagen de 256 px), ` +
+  const medidas = escala
+    ? `MRD ${fmtCm(r.mrdPx)}, MLD ${fmtCm(r.mldPx)}, ID ${fmtCm(r.idPx)}; tamaño de píxel del DICOM` +
+      (escala.fuente === "ImagerPixelSpacing" ? " en el detector, sin corregir magnificación" : "")
+    : `MRD ${fmtPx(r.mrdPx)}, MLD ${fmtPx(r.mldPx)}, ID ${fmtPx(r.idPx)}; imagen de 256 px`;
+  return `ICT ${fmt(r.ict)} (${medidas}), ` +
     `${datos.proy}, medida ${ed ? "corregida manualmente" : "automática"}` +
     (motivosCalidad().length ? `, imagen de baja calidad (${motivosCalidad().join(", ")})` : "") +
     `. Valor de apoyo; no reemplaza la lectura radiológica.`;

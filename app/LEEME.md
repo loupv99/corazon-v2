@@ -4,8 +4,8 @@ Una sola página (`index.html`) que corre la U-Net en el dispositivo con ONNX Ru
 a ningún servidor. Interfaz según el diseño de Figma del 2026-11-06 (visor tipo PACS, IBM Plex Sans/Mono, tema oscuro
 y claro).
 
-1. **Inicio.** Subir una radiografía (o arrastrarla), tomar una foto o abrir un ejemplo (`?ejemplo=con` /
-   `?ejemplo=sin` lo abre directo). Datos opcionales del estudio (historia clínica, edad, sexo, fecha, proyección
+1. **Inicio.** Subir una radiografía PNG, JPG o DICOM (o arrastrarla), tomar una foto o abrir un ejemplo
+   (`?ejemplo=con`, `?ejemplo=sin` o `?ejemplo=dicom` lo abre directo). Datos opcionales del estudio (historia clínica, edad, sexo, fecha, proyección
    PA/AP): quedan solo en la página, no se guardan ni se envían; la proyección se anota en el informe y, si es AP,
    se advierte que el corazón se ve más grande.
 2. **Marcar esquinas** (si es una foto de un negatoscopio o un monitor): se tocan las 4 esquinas en orden, con lupa
@@ -16,6 +16,18 @@ y claro).
    «Copiar al informe» copia una línea con el ICT, MRD, MLD, ID, la proyección y si la medida se corrigió.
 4. **Carga del modelo** con progreso real de la descarga (31 MB, solo la primera vez) y **no medible** cuando faltan
    los pulmones o el corazón.
+
+**DICOM** (2026-11-06). Abre DICOM sin compresión (Explicit/Implicit VR Little Endian) con dicom-parser 1.8.21:
+8 bits se usan tal cual (mismo ICT que el PNG); 12-16 bits con la ventana del archivo (o mínimo-máximo) y
+MONOCHROME1 invertido. Si trae **PixelSpacing**, MRD, MLD e ID salen también en **cm** (mm por píxel a 256 px =
+espaciado de columna × ancho / 256, como `src/prepare_data.py`); si solo trae ImagerPixelSpacing, lo usa y el informe
+avisa que está en el detector, sin corregir magnificación. Completa la proyección (ViewPosition), la edad, el sexo y
+la fecha si están vacíos; no lee el nombre del paciente. Un DICOM comprimido (JPEG, JPEG 2000, RLE) da un aviso y no
+se mide. `ejemplos/*.dcm` = las dos placas de ejemplo convertidas con `python -m src.dicom` (captura secundaria: misma
+imagen de 8 bits del NIH y su tamaño de píxel; **no** son los estudios originales; el espaciado vertical repite el
+horizontal porque el NIH estiró las placas a 1 024 × 1 024 y solo se usan anchos). Verificado en Chrome el 2026-11-06:
+ejemplo «con» 0,52 con MRD 4,9 · MLD 13,3 · ID 35,0 cm (tabla de E1b semilla 1: 4,91 · 13,35 · 34,98); «sin» 0,45
+con 4,1 · 10,3 · 32,3 cm; un DICOM de prueba de 16 bits MONOCHROME1 dio 0,52 (MLD 86 px en vez de 87 por la ventana).
 
 **Detector de baja calidad** (2026-11-06; `src/calidad.py`, `results/calidad/LEEME.md`). Sobre la imagen de 256 px y
 la salida de la red calcula contraste, nitidez, exposición, incertidumbre de la red y estructuras cortadas por el
@@ -43,6 +55,7 @@ más `.nojekyll`; verificada el 2026-11-06: el ejemplo «con» da 0,52). Si camb
 **Probar en local:** `cd app && python -m http.server 8000` y abrir http://localhost:8000 (como archivo suelto no
 carga el modelo). La primera vez necesita conexión para ONNX Runtime y las fuentes.
 
-**Límites:** la app no detecta las marcas ArUco (haría falta OpenCV.js, ~8 MB): las esquinas se marcan a mano. No
-reporta cm porque una foto no trae el tamaño del píxel. El detector de calidad se calibró con 100 placas y 300 fotos
+**Límites:** la app no detecta las marcas ArUco (haría falta OpenCV.js, ~8 MB): las esquinas se marcan a mano. Con PNG,
+JPG o fotos no reporta cm porque no traen el tamaño del píxel (solo los DICOM que lo traen). No abre DICOM
+comprimidos. El detector de calidad se calibró con 100 placas y 300 fotos
 de una sola sesión: es una alerta, no una garantía. Es una herramienta académica, no un dispositivo médico.
