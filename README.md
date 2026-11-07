@@ -2,6 +2,8 @@
 
 Proyecto final de MIA-203 Redes Neuronales y Aprendizaje Profundo (UNI FIIS, 2026-II).
 
+**App en línea:** https://loupv99.github.io/corazon-v2/ (rama `gh-pages`; la imagen no sale del dispositivo).
+
 Una U-Net segmenta pulmones y corazón en la radiografía de tórax y, con esos contornos, se calcula el índice
 cardiotorácico (ICT). Se compara con una CNN de caja negra (ResNet-50) para detectar cardiomegalia, usando etiquetas
 débiles (CheXmask) y doradas (SCR), y se mide la robustez a la proyección AP y a fotos tomadas con celular.

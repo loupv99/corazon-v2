@@ -36,6 +36,10 @@ reducción a 256 px).
 **Modelo:** `modelo/unet.onnx` (31 MB) = U-Net E1b semilla 1, elegida por Dice de validación (0,9596), no por el test.
 Se regenera con `python -m src.exportar_onnx --ckpt runs/E1b_debil_rca07_s1/best.pt --out app/modelo/unet.onnx`.
 
+**En línea:** https://loupv99.github.io/corazon-v2/ (GitHub Pages, rama `gh-pages` = el contenido de `app/` en la raíz
+más `.nojekyll`; verificada el 2026-11-06: el ejemplo «con» da 0,52). Si cambia `app/`, hay que actualizar
+`gh-pages`; al subirla, usar `git -c pack.useSparse=false push`, o git vuelve a enviar el modelo de 31 MB.
+
 **Probar en local:** `cd app && python -m http.server 8000` y abrir http://localhost:8000 (como archivo suelto no
 carga el modelo). La primera vez necesita conexión para ONNX Runtime y las fuentes.
 
