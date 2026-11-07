@@ -27,7 +27,7 @@ La columna **Expone** la llena el equipo: todos exponen y el jurado puede pregun
 | 16 | Resultado 2 | | 80 | | ICC 0.945–0.951 sin humanos; paradoja de E1c |
 | 17 | Resultado 3 | | 90 | | Todos pierden en AP; el ICT se corrige con la vista |
 | 18 | Resultado 4 | | 90 | | El ICT cambia menos y solo cerca de 0.50 |
-| 19 | La aplicación | | 80 | | ONNX = PyTorch; el médico arrastra la línea |
+| 19 | La aplicación | | 80 | | ONNX = PyTorch; el médico corrige los bordes; aviso de calidad (20 % vs. 2,9 %) |
 | 20 | Grad-CAM | Discusión (4) | 70 | | El mapa se ve igual cuando acierta y cuando falla |
 | 21 | Discusión | | 80 | | Explicar no es medir; E6: el ICT no ve el ventrículo derecho |
 | 22 | Limitaciones e impacto | | 90 | | Apoyo, no diagnóstico; la imagen no sale del teléfono |
