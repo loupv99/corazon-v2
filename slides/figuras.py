@@ -113,7 +113,7 @@ ax.set_ylabel("Energía de Grad-CAM en el corazón\n(veces la de un mapa uniform
 ax.grid(axis="x", visible=False)
 guardar(fig, "gradcam_grupos.png")
 
-# 5. Cuatro placas de la tira de Grad-CAM (semilla 0); la 3.ª trae el rótulo PORTABLE
+# 5. Cuatro placas de la tira de Grad-CAM (semilla 0); la 3.ª de la tira (2.ª de la figura) trae el rótulo PORTABLE
 tira = Image.open(RES / "kaggle-v2/E2_resnet_paap_s0_gradcam.png").convert("RGB")
 paso = tira.size[0] // 8
 Image.fromarray(np.hstack([np.array(tira.crop((k * paso, 0, (k + 1) * paso, tira.size[1])))
