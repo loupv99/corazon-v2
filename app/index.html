@@ -1,108 +1,370 @@
 <!doctype html>
-<html lang="es">
+<html lang="es" data-theme="oscuro">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Corazón v2</title>
+<title>ICT · Índice cardiotorácico</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --fondo: #f6f5f2; --papel: #ffffff; --tinta: #1d1c1a; --suave: #6b6862; --linea: #dedad3;
-    --acento: #b3261e; --pulmon: #2f6db5; --ok: #2e7d4f; --radio: 12px;
+  /* Interfaz según el diseño de Figma (2026-11-06): visor tipo PACS, grises neutros, un solo azul de acción. */
+  :root, [data-theme="oscuro"] {
+    --fondo: #1c1c1c; --barra: #222222; --visor: #141414; --panel: #222222; --campo: #181818;
+    --tinta: #ececec; --suave: #a8a8a8; --tenue: #6f6f6f; --linea: #353535;
+    --accion: #2f5d8a; --accion-txt: #ffffff; --enlace: #8fb6dc;
+    --pulmon: #4fa3b8; --corazon: #d98e2b;
+    --ambar-fondo: #3a2e1c; --ambar-txt: #e8b26a; --verde-fondo: #1f2e27; --verde-txt: #9cc4ab;
   }
-  @media (prefers-color-scheme: dark) {
-    :root { --fondo: #141413; --papel: #1f1e1c; --tinta: #eeece7; --suave: #a19d95; --linea: #34322e;
-            --acento: #ef6a5f; --pulmon: #6ea6e8; --ok: #6cc28f; }
+  [data-theme="claro"] {
+    --fondo: #f3f3f2; --barra: #ffffff; --visor: #141414; --panel: #ffffff; --campo: #ffffff;
+    --tinta: #1d1d1d; --suave: #555555; --tenue: #8a8a8a; --linea: #d9d9d6;
+    --accion: #2f5d8a; --accion-txt: #ffffff; --enlace: #2f5d8a;
+    --pulmon: #4fa3b8; --corazon: #d98e2b;
+    --ambar-fondo: #f6ead8; --ambar-txt: #7a4d0f; --verde-fondo: #e5efe8; --verde-txt: #2f5d43;
   }
   * { box-sizing: border-box; }
-  body { margin: 0; background: var(--fondo); color: var(--tinta);
-         font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
-  main { max-width: 1040px; margin: 0 auto; padding: 24px 16px 48px; }
-  h1 { font-size: 1.5rem; margin: 0 0 4px; letter-spacing: -0.01em; }
-  .sub { color: var(--suave); margin: 0 0 20px; }
-  .tarjeta { background: var(--papel); border: 1px solid var(--linea); border-radius: var(--radio); padding: 16px; }
-  .acciones { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
-  button, label.boton { font: inherit; border: 1px solid var(--linea); background: var(--papel); color: var(--tinta);
-         border-radius: 999px; padding: 8px 16px; cursor: pointer; }
-  button.principal, label.principal { background: var(--tinta); color: var(--fondo); border-color: var(--tinta); }
-  button:disabled { opacity: .45; cursor: default; }
-  input[type=file] { display: none; }
-  .opcion { display: flex; gap: 8px; align-items: flex-start; margin-top: 12px; color: var(--suave); font-size: .95rem; }
-  .estado { margin-top: 12px; color: var(--suave); font-size: .95rem; min-height: 1.5em; }
-  .rejilla { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 16px; margin-top: 16px; }
-  @media (max-width: 760px) { .rejilla { grid-template-columns: minmax(0, 1fr); } }
-  .tarjeta { min-width: 0; }
-  canvas { width: 100%; height: auto; display: block; border-radius: 8px; background: #000; touch-action: none; }
-  .ict { font-size: 3.5rem; font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
-  .veredicto { font-weight: 600; margin: 8px 0 12px; }
-  .barra { position: relative; height: 10px; border-radius: 5px; background: var(--linea); margin: 8px 0 4px; }
-  .barra i { position: absolute; top: -4px; width: 4px; height: 18px; border-radius: 2px; background: var(--tinta); }
-  .barra b { position: absolute; top: -2px; left: 50%; width: 2px; height: 14px; background: var(--acento); }
-  .escala { display: flex; justify-content: space-between; font-size: .8rem; color: var(--suave); }
-  dl { display: grid; grid-template-columns: auto auto; gap: 4px 12px; margin: 16px 0; font-variant-numeric: tabular-nums; }
-  dt { color: var(--suave); } dd { margin: 0; text-align: right; }
-  .leyenda { font-size: .85rem; color: var(--suave); }
-  .leyenda span { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 4px; vertical-align: -1px; }
-  .aviso { font-size: .85rem; color: var(--suave); margin-top: 24px; }
+  html, body { margin: 0; height: 100%; }
+  body { background: var(--fondo); color: var(--tinta); font: 15px/1.45 "IBM Plex Sans", system-ui, "Segoe UI", sans-serif;
+         display: flex; flex-direction: column; height: 100vh; }
+  .mono { font-family: "IBM Plex Mono", ui-monospace, Consolas, monospace; font-variant-numeric: tabular-nums; }
+  button, input, select { font: inherit; color: inherit; }
+  button { cursor: pointer; }
+  button:focus-visible, input:focus-visible, select:focus-visible, label:focus-visible, [contenteditable]:focus-visible
+    { outline: 2px solid var(--enlace); outline-offset: 2px; }
   .oculto { display: none !important; }
+
+  /* Encabezado */
+  .cab { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 14px 24px;
+         background: var(--barra); border-bottom: 1px solid var(--linea); }
+  .cab h1 { margin: 0; font-size: 22px; font-weight: 600; letter-spacing: -0.01em; }
+  .establecimiento { display: flex; align-items: center; gap: 14px; color: var(--suave); font-size: 14px; }
+  .establecimiento [contenteditable="true"] { color: var(--tinta); border-bottom: 1px dashed var(--suave); }
+  .btn-texto { background: none; border: 0; color: var(--suave); padding: 4px 2px; font-size: 13px; display: inline-flex; gap: 6px; align-items: center; }
+  .tema { display: flex; align-items: center; gap: 12px; color: var(--suave); font-size: 14px; }
+  .seg { display: inline-flex; border: 1px solid var(--linea); border-radius: 4px; overflow: hidden; }
+  .seg button { background: transparent; border: 0; padding: 6px 12px; color: var(--suave); font-size: 14px; }
+  .seg button[aria-pressed="true"] { background: var(--fondo); color: var(--tinta); font-weight: 600; }
+  .sub { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 10px 24px;
+         border-bottom: 1px solid var(--linea); background: var(--barra); }
+  .sub b { font-weight: 500; }
+  .resumen { color: var(--suave); font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .resumen i { font-style: normal; color: var(--tenue); padding: 0 10px; }
+
+  main { flex: 1; display: flex; min-height: 0; overflow: auto; }
+
+  /* Inicio */
+  .inicio { width: 100%; max-width: 1440px; margin: 0 auto; padding: 32px; display: grid;
+            grid-template-columns: minmax(0, 1fr) 456px; gap: 32px; align-content: start; }
+  .inicio h2 { margin: 0 0 6px; font-size: 28px; font-weight: 600; }
+  .inicio .intro { margin: 0 0 24px; color: var(--suave); }
+  .zona { border: 1px dashed var(--tenue); border-radius: 4px; min-height: 320px; display: flex; flex-direction: column;
+          align-items: center; justify-content: center; gap: 12px; padding: 32px; text-align: center; }
+  .zona.encima { border-color: var(--enlace); background: rgba(47, 93, 138, .08); }
+  .zona h3 { margin: 4px 0 0; font-size: 18px; font-weight: 600; }
+  .zona p { margin: 0; color: var(--suave); font-size: 14px; }
+  .botones { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 18px; border-radius: 4px;
+         border: 1px solid var(--linea); background: transparent; color: var(--tinta); font-weight: 500; min-height: 44px; }
+  .btn.prim { background: var(--accion); border-color: var(--accion); color: var(--accion-txt); }
+  .btn:disabled { opacity: .45; cursor: default; }
+  .btn.ancho { width: 100%; }
+  input[type=file] { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+  .ejemplos { font-size: 14px; color: var(--suave); }
+  .ejemplos button { background: none; border: 0; color: var(--enlace); padding: 2px 4px; font-weight: 500; }
+  .chk { display: flex; gap: 8px; align-items: flex-start; font-size: 14px; color: var(--suave); text-align: left; max-width: 460px; }
+  .chk input { margin-top: 3px; accent-color: var(--accion); }
+  .guias { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; margin-top: 24px; }
+  .guias h4 { margin: 0 0 6px; font-size: 15px; font-weight: 600; }
+  .guias p { margin: 0; color: var(--suave); font-size: 14px; }
+  .caja { border: 1px solid var(--linea); border-radius: 4px; padding: 24px; background: var(--panel); align-self: start; }
+  .caja h3 { margin: 0; font-size: 18px; font-weight: 600; }
+  .fila-tit { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 20px; }
+  .fila-tit small { color: var(--suave); font-size: 13px; }
+  .campos { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .campo label { display: block; font-size: 14px; color: var(--suave); margin-bottom: 6px; }
+  .campo input, .campo select { width: 100%; height: 40px; padding: 0 12px; border: 1px solid var(--linea); border-radius: 4px;
+         background: var(--campo); }
+  .proy { margin-top: 18px; }
+  .proy .seg { display: flex; width: 100%; }
+  .proy .seg button { flex: 1; padding: 10px; font-weight: 600; color: var(--tinta); }
+  .proy .seg button[aria-pressed="true"] { background: var(--accion); color: var(--accion-txt); }
+  .nota { font-size: 13px; color: var(--suave); margin: 8px 0 0; }
+  .sep { border: 0; border-top: 1px solid var(--linea); margin: 20px 0; }
+
+  /* Estudio: visor + panel */
+  .estudio { flex: 1; display: grid; grid-template-columns: minmax(0, 1fr) 504px; grid-template-rows: minmax(0, 1fr); min-height: 0; }
+  .visor { background: var(--visor); display: flex; flex-direction: column; min-width: 0; min-height: 0; border-right: 1px solid var(--linea); }
+  .visor-bar { display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; color: #bdbdbd;
+               border-bottom: 1px solid #2a2a2a; font-size: 13px; }
+  .visor-bar .herr { display: flex; gap: 6px; align-items: center; }
+  .visor-bar button { background: none; border: 0; color: #bdbdbd; padding: 6px; display: inline-flex; font-size: 13px; }
+  .visor-bar .activo { color: var(--enlace); }
+  .aviso-visor { background: var(--ambar-fondo); color: var(--ambar-txt); padding: 8px 20px; font-size: 14px;
+                 border-left: 3px solid var(--corazon); display: flex; gap: 8px; align-items: center; }
+  .lienzo-caja { flex: 1; overflow: auto; display: flex; align-items: center; justify-content: center; padding: 12px; min-height: 0; }
+  .lienzo-caja canvas { display: block; max-width: 100%; max-height: 100%; touch-action: none; }
+  .lienzo-caja.zoom canvas { max-width: none; max-height: none; }
+  .visor-pie { padding: 10px 20px; font-size: 13px; color: #9a9a9a; display: flex; gap: 20px; flex-wrap: wrap; }
+  .visor-pie .p { color: var(--pulmon); } .visor-pie .c { color: var(--corazon); }
+
+  .panel { background: var(--panel); padding: 20px 24px; overflow: auto; }
+  .panel h3 { margin: 0 0 4px; font-size: 18px; font-weight: 600; }
+  .etq { font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--suave); }
+  .ict-fila { display: flex; justify-content: space-between; align-items: flex-start; }
+  .ict-num { font-size: 64px; line-height: 1.05; font-weight: 500; }
+  .ict-lado { text-align: right; color: var(--suave); font-size: 13px; padding-top: 18px; }
+  .ict-lado b { color: var(--tinta); font-weight: 500; font-size: 15px; }
+  .lectura { padding: 10px 12px; border-left: 3px solid; font-weight: 500; margin: 8px 0 14px; }
+  .lectura.alta { background: var(--ambar-fondo); color: var(--ambar-txt); border-color: var(--corazon); }
+  .lectura.normal { background: var(--verde-fondo); color: var(--verde-txt); border-color: #6f9c80; }
+  .origen { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; color: var(--suave); font-size: 14px; }
+  .origen button { background: none; border: 0; color: var(--enlace); padding: 0; font-size: 14px; }
+  .delta { font-size: 13px; color: var(--suave); margin-top: 2px; }
+  .escala { position: relative; height: 34px; margin: 22px 0 6px; }
+  .escala .riel { position: absolute; left: 0; right: 0; top: 10px; height: 3px; background: #8fa79a; }
+  .escala .riel i { position: absolute; top: 0; bottom: 0; right: 0; background: var(--corazon); }
+  .escala .umbral { position: absolute; top: 2px; width: 1px; height: 18px; background: var(--suave); }
+  .escala .valor { position: absolute; top: -2px; width: 4px; height: 22px; margin-left: -2px; background: var(--tinta); }
+  .escala .valor span { position: absolute; top: -18px; left: 50%; transform: translateX(-50%); font-size: 11px; color: var(--suave); }
+  .escala-txt { display: flex; justify-content: space-between; font-size: 12px; color: var(--suave); }
+  dl.med { display: grid; grid-template-columns: 1fr auto; gap: 8px 12px; margin: 16px 0 0; padding-top: 14px; border-top: 1px solid var(--linea); }
+  dl.med dt { color: var(--suave); font-size: 14px; } dl.med dd { margin: 0; text-align: right; font-size: 16px; }
+  .formula { font-size: 13px; color: var(--suave); margin: 8px 0 0; }
+  .capas { display: flex; gap: 18px; padding: 14px 0; border-top: 1px solid var(--linea); margin-top: 14px; font-size: 14px; flex-wrap: wrap; }
+  .capas label { display: inline-flex; gap: 6px; align-items: center; }
+  .capas input { accent-color: var(--accion); }
+  .capas .p { color: var(--pulmon); } .capas .c { color: var(--corazon); }
+  .acciones2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .informe { border: 1px solid var(--linea); border-radius: 4px; padding: 10px 12px; margin-top: 10px; font-size: 13px; }
+  .informe small { display: block; color: var(--suave); margin-bottom: 4px; }
+  .pie-nota { font-size: 13px; color: var(--suave); margin-top: 12px; }
+
+  /* Esquinas */
+  .pasos { list-style: none; padding: 0; margin: 18px 0; }
+  .pasos li { display: flex; gap: 18px; padding: 5px 0; color: var(--suave); }
+  .pasos li.hecho { color: var(--tinta); }
+  .pasos li.activo { color: var(--enlace); }
+  .previa { display: flex; gap: 16px; align-items: flex-start; padding: 16px 0; border-top: 1px solid var(--linea); margin-top: 8px; }
+  .previa canvas { width: 104px; height: 104px; background: #000; flex: none; }
+  .previa h4 { margin: 0 0 4px; font-size: 15px; font-weight: 600; }
+  .previa p { margin: 0 0 4px; font-size: 13px; color: var(--suave); }
+  .lupa { position: fixed; width: 132px; height: 132px; border: 1px solid var(--enlace); background: #000; pointer-events: none; z-index: 5; }
+  .lupa span { position: absolute; left: 6px; bottom: 4px; font: 11px "IBM Plex Mono", monospace; color: #ddd; }
+
+  /* Progreso y errores */
+  .prog { height: 4px; background: var(--linea); margin: 8px 0 14px; }
+  .prog i { display: block; height: 100%; width: 100%; background: var(--enlace); transform: scaleX(0);
+            transform-origin: left; transition: transform .2s; }
+  .icono-tit { display: flex; gap: 10px; align-items: center; }
+  .lista-chk { margin: 8px 0 18px; padding: 0; list-style: none; color: var(--suave); }
+  .lista-chk li { padding: 4px 0; }
+
+  footer .seguro { display: flex; gap: 8px; align-items: center; padding: 10px 24px; border-top: 1px solid var(--linea);
+                   background: var(--barra); color: var(--suave); font-size: 13px; }
+  footer .legal { padding: 12px 24px; font-size: 13px; color: var(--suave); }
+
+  @media (max-width: 1100px) { .estudio { grid-template-columns: minmax(0, 1fr) 400px; } .inicio { grid-template-columns: minmax(0, 1fr) 380px; } }
+  @media (max-width: 820px) {
+    .cab { padding: 12px 16px; flex-wrap: wrap; } .cab h1 { font-size: 19px; } .tema > span { display: none; }
+    .sub { padding: 8px 16px; } .resumen { display: none; }
+    .inicio { grid-template-columns: 1fr; padding: 16px; gap: 20px; } .guias { grid-template-columns: 1fr; gap: 12px; }
+    .zona { min-height: 220px; padding: 20px; }
+    body { height: auto; min-height: 100vh; } main { overflow: visible; }
+    .estudio { grid-template-columns: 1fr; grid-template-rows: auto auto; } .visor { border-right: 0; }
+    .lienzo-caja { min-height: 360px; } .lienzo-caja canvas { max-height: none; }
+    .panel { padding: 16px; } .ict-num { font-size: 52px; }
+  }
 </style>
 </head>
 <body>
+<header class="cab">
+  <div>
+    <h1>ICT · Índice cardiotorácico</h1>
+    <div class="establecimiento">
+      <span id="estab" spellcheck="false">Hospital Regional — Servicio de Medicina</span>
+      <button class="btn-texto" id="editar-estab" aria-label="Editar nombre del establecimiento">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 20h4L19 9l-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/></svg>
+        <span>Editar</span></button>
+    </div>
+  </div>
+  <div class="tema"><span>Panel</span>
+    <div class="seg" role="group" aria-label="Tema">
+      <button id="t-oscuro" aria-pressed="true">Oscuro</button><button id="t-claro" aria-pressed="false">Claro</button>
+    </div>
+  </div>
+</header>
+<div class="sub">
+  <b id="paso">01 · Inicio</b>
+  <div class="resumen mono" id="resumen"></div>
+</div>
+
 <main>
-  <h1>Corazón v2 · índice cardiotorácico</h1>
-  <p class="sub">Una U-Net dibuja pulmones y corazón; con esos contornos se mide el índice como lo hace el radiólogo.
-    Todo corre en este dispositivo: la imagen no sale de aquí.</p>
-
-  <section class="tarjeta">
-    <div class="acciones">
-      <label class="boton principal" for="archivo">Subir radiografía</label>
-      <input id="archivo" type="file" accept="image/*">
-      <label class="boton" for="camara">Tomar foto</label>
-      <input id="camara" type="file" accept="image/*" capture="environment">
-      <button id="ej-con">Ejemplo con cardiomegalia</button>
-      <button id="ej-sin">Ejemplo sin cardiomegalia</button>
+  <!-- 01 · Inicio -->
+  <section class="inicio" id="v-inicio">
+    <div>
+      <h2>Nueva medición</h2>
+      <p class="intro">Cargue una radiografía frontal. Revise los límites anatómicos y ajuste los bordes cuando sea necesario.</p>
+      <div class="zona" id="zona">
+        <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><rect x="3" y="3" width="18" height="18" rx="1"/><circle cx="9" cy="9" r="2"/><path d="M21 15l-5-5-9 9"/><path d="M15 21v-6m0 0l-2.5 2.5M15 15l2.5 2.5"/></svg>
+        <h3>Arrastre y suelte una radiografía aquí</h3>
+        <p>PNG / JPG · radiografía de tórax frontal completa</p>
+        <div class="botones">
+          <label class="btn prim" for="archivo" tabindex="0">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 16V4m0 0l-4 4m4-4l4 4M4 16v4h16v-4"/></svg>
+            Subir radiografía</label>
+          <label class="btn" for="camara" tabindex="0">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>
+            Tomar foto</label>
+        </div>
+        <input id="archivo" type="file" accept="image/*">
+        <input id="camara" type="file" accept="image/*" capture="environment">
+        <label class="chk"><input type="checkbox" id="es-foto">
+          <span>Es una foto de un negatoscopio o de un monitor: marcaré las cuatro esquinas para enderezarla.</span></label>
+        <div class="ejemplos">Abrir ejemplo: <button id="ej-con">con cardiomegalia</button> · <button id="ej-sin">sin cardiomegalia</button></div>
+      </div>
+      <div class="guias">
+        <div><h4>Archivo de Telesalud</h4><p>Use la imagen original. Incluya ambos pulmones y el contorno cardíaco completo.</p></div>
+        <div><h4>Foto de negatoscopio o monitor</h4><p>Evite reflejos. Marque las cuatro esquinas para enderezar la imagen antes de medir.</p></div>
+      </div>
     </div>
-    <label class="opcion"><input type="checkbox" id="esquinas">
-      <span>Es una foto de una pantalla o de una placa: marcaré las 4 esquinas de la radiografía para enderezarla.</span></label>
-    <div class="estado" id="estado">Cargando el modelo (31 MB, solo la primera vez)…</div>
+    <aside class="caja">
+      <div class="fila-tit"><h3>Datos opcionales</h3><small>Solo en este equipo</small></div>
+      <div class="campos">
+        <div class="campo"><label for="d-hc">N.º de historia clínica</label><input id="d-hc" class="mono" autocomplete="off"></div>
+        <div class="campo"><label for="d-edad">Edad</label><input id="d-edad" class="mono" inputmode="numeric" placeholder="años" autocomplete="off"></div>
+        <div class="campo"><label for="d-sexo">Sexo</label>
+          <select id="d-sexo"><option value="">—</option><option>Femenino</option><option>Masculino</option></select></div>
+        <div class="campo"><label for="d-fecha">Fecha de placa</label><input id="d-fecha" class="mono" placeholder="dd/mm/aaaa" autocomplete="off"></div>
+      </div>
+      <div class="proy campo">
+        <label>Proyección de la placa</label>
+        <div class="seg" role="group" aria-label="Proyección">
+          <button id="p-pa" aria-pressed="true">PA</button><button id="p-ap" aria-pressed="false">AP</button>
+        </div>
+        <p class="nota" id="nota-proy"></p>
+      </div>
+      <hr class="sep">
+      <p class="nota" style="margin:0">No se requiere nombre del paciente. Puede medir sin completar estos datos; no se guardan ni se envían.</p>
+    </aside>
   </section>
 
-  <section class="tarjeta oculto" id="paso-esquinas" style="margin-top:16px">
-    <p style="margin-top:0">Toca las esquinas de la radiografía en este orden: <b>superior izquierda, superior derecha,
-      inferior derecha, inferior izquierda</b>.</p>
-    <canvas id="lienzo-foto"></canvas>
-    <div class="acciones" style="margin-top:12px">
-      <button id="medir-foto" class="principal" disabled>Medir</button>
-      <button id="borrar-esquinas">Borrar esquinas</button>
+  <!-- 02-06 · Estudio -->
+  <section class="estudio oculto" id="v-estudio">
+    <div class="visor" id="visor">
+      <div class="visor-bar">
+        <span class="mono" id="visor-tit">TÓRAX FRONTAL &nbsp;/&nbsp; PA</span>
+        <div class="herr">
+          <button id="ajustar">Ajustar</button>
+          <button id="zoom" aria-label="Ampliar"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4M11 8v6M8 11h6"/></svg></button>
+          <button id="pantalla" aria-label="Pantalla completa"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
+        </div>
+      </div>
+      <div class="aviso-visor oculto" id="aviso-visor"></div>
+      <div class="lienzo-caja" id="caja"><canvas id="lienzo"></canvas></div>
+      <div class="visor-pie" id="visor-pie"></div>
     </div>
-  </section>
 
-  <section class="rejilla oculto" id="resultado">
-    <div class="tarjeta"><canvas id="lienzo"></canvas>
-      <p class="leyenda" style="margin-bottom:0"><span style="background:var(--pulmon)"></span>pulmones
-        <span style="background:var(--acento);margin-left:12px"></span>corazón ·
-        arrastra las líneas verticales para corregir la medida.</p>
-    </div>
-    <div class="tarjeta">
-      <div class="leyenda">Índice cardiotorácico</div>
-      <div class="ict" id="ict">–</div>
-      <div class="barra"><b></b><i id="marcador"></i></div>
-      <div class="escala"><span>0,30</span><span>0,50</span><span>0,70</span></div>
-      <div class="veredicto" id="veredicto"></div>
-      <dl>
-        <dt>Lado derecho (MRD/ID)</dt><dd id="mrd">–</dd>
-        <dt>Lado izquierdo (MLD/ID)</dt><dd id="mld">–</dd>
-        <dt>Medida</dt><dd id="origen">automática</dd>
-      </dl>
-      <button id="restaurar" disabled>Volver a la medida automática</button>
-      <p class="leyenda">ICT = (MRD + MLD) / ID. Umbral clínico habitual: 0,50 en placa PA; en placa AP el corazón se
-        ve más grande y el índice tiende a sobrestimarse.</p>
-    </div>
-  </section>
+    <aside class="panel">
+      <!-- Medición -->
+      <div id="p-medicion" class="oculto">
+        <div class="ict-fila"><h3>Resultado de la medición</h3><span class="nota" style="margin:0">Unidad: píxeles</span></div>
+        <div class="etq" style="margin-top:6px">Índice cardiotorácico</div>
+        <div class="ict-fila">
+          <div class="ict-num mono" id="ict">–</div>
+          <div class="ict-lado"><b id="lado-proy">PA</b><br><span class="mono" id="lado-id"></span></div>
+        </div>
+        <div class="lectura" id="lectura"></div>
+        <div class="origen"><span id="origen">Automática</span><button id="restaurar" class="oculto">Volver a la medida automática</button></div>
+        <div class="delta mono oculto" id="delta"></div>
+        <div class="escala" aria-hidden="true">
+          <div class="riel"><i id="riel-alto"></i></div>
+          <div class="umbral" id="umbral"></div>
+          <div class="valor" id="valor"><span class="mono" id="valor-txt"></span></div>
+        </div>
+        <div class="escala-txt mono"><span>0,35</span><span>0,50 · umbral</span><span>0,70</span></div>
+        <dl class="med mono">
+          <dt>MRD · borde derecho</dt><dd id="v-mrd">–</dd>
+          <dt>MLD · borde izquierdo</dt><dd id="v-mld">–</dd>
+          <dt>ID · diámetro torácico</dt><dd id="v-id">–</dd>
+        </dl>
+        <p class="formula mono">ICT = (MRD + MLD) / ID</p>
+        <p class="formula">Calidad de imagen: <span id="calidad"></span></p>
+        <div class="capas">
+          <label class="p"><input type="checkbox" id="c-pulmon" checked> Pulmones</label>
+          <label class="c"><input type="checkbox" id="c-corazon" checked> Corazón</label>
+          <label><input type="checkbox" id="c-medidas" checked> Medidas</label>
+        </div>
+        <div class="acciones2">
+          <button class="btn" id="corregir">Corregir bordes</button>
+          <button class="btn prim" id="copiar">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="8" y="8" width="12" height="12" rx="1"/><path d="M16 8V4H4v12h4"/></svg>
+            <span>Copiar al informe</span></button>
+        </div>
+        <div class="informe"><small>Texto para el informe</small><span id="informe"></span></div>
+        <p class="pie-nota">La lectura depende de la proyección y la calidad de la placa. Confirme los límites antes de usar la medida.</p>
+        <button class="btn ancho" id="nueva" style="margin-top:6px">Nueva medición</button>
+      </div>
 
-  <p class="aviso">Herramienta académica del proyecto final de MIA-203 (UNI-FIIS, Grupo 6). No es un dispositivo médico
-    ni reemplaza la lectura de un profesional. Modelo: U-Net entrenada con máscaras automáticas de CheXmask sobre
-    NIH ChestX-ray14 (semilla 1, Dice medio de validación 0,96). Ejemplos: NIH ChestX-ray14.</p>
+      <!-- Esquinas -->
+      <div id="p-esquinas" class="oculto">
+        <h3>Delimite la placa</h3>
+        <p class="nota" style="font-size:15px">Marque las cuatro esquinas en este orden, siguiendo el borde de la radiografía.</p>
+        <ol class="pasos mono" id="pasos"></ol>
+        <div class="previa">
+          <canvas id="previa" width="104" height="104"></canvas>
+          <div><h4>Vista previa enderezada</h4><p id="previa-n">0 de 4 esquinas marcadas</p>
+            <p>Confirme que ambos pulmones y el corazón estén completos.</p></div>
+        </div>
+        <button class="btn prim ancho" id="medir-foto" disabled>Medir</button>
+        <button class="btn ancho" id="borrar-esquinas" style="margin-top:10px">Borrar esquinas</button>
+      </div>
+
+      <!-- Carga del modelo -->
+      <div id="p-carga" class="oculto">
+        <h3>Preparación local</h3>
+        <p style="font-size:22px; font-weight:500; margin:14px 0 18px">Preparando el modelo en este equipo (31 MB, solo la primera vez)</p>
+        <div class="ict-fila nota" style="margin:0"><span>Preparando archivos locales</span><span class="mono" id="prog-txt">0 %</span></div>
+        <div class="prog"><i id="prog"></i></div>
+        <p class="nota">El modelo se prepara localmente para medir en este equipo. Espere a que termine; la radiografía no se envía.</p>
+        <hr class="sep">
+        <button class="btn ancho" id="medir-carga" disabled>Medir</button>
+        <p class="nota">La medición estará disponible cuando finalice la preparación. No cierre esta ventana.</p>
+      </div>
+
+      <!-- No medible -->
+      <div id="p-error" class="oculto">
+        <div class="icono-tit">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--corazon)" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M12 7v6M12 16.5v.5"/></svg>
+          <h3 style="font-size:24px; margin:0" id="error-tit">Imagen no medible</h3>
+        </div>
+        <p style="font-size:16px" id="error-txt">No se encontraron ambos pulmones y el corazón. Revise que la imagen sea una radiografía de tórax frontal completa.</p>
+        <hr class="sep">
+        <b>Antes de reintentar</b>
+        <ul class="lista-chk">
+          <li>Incluya ambos ápices y bases pulmonares.</li>
+          <li>Compruebe que el corazón esté completo.</li>
+          <li>Evite reflejos, inclinación y recortes.</li>
+        </ul>
+        <button class="btn prim ancho" id="reintentar">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M20 12a8 8 0 1 1-2.3-5.7M20 4v4h-4"/></svg>
+          Reintentar</button>
+        <button class="btn ancho" id="otra" style="margin-top:10px">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 16V4m0 0l-4 4m4-4l4 4M4 16v4h16v-4"/></svg>
+          Cargar otra imagen</button>
+        <p class="nota">No se ha generado una medida. No use esta imagen para estimar el índice con esta herramienta.</p>
+      </div>
+    </aside>
+  </section>
 </main>
+<div class="lupa oculto" id="lupa"><canvas id="lupa-c" width="132" height="132"></canvas><span id="lupa-txt"></span></div>
+
+<footer>
+  <div class="seguro"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="5" y="11" width="14" height="10" rx="1"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+    Procesado en este equipo · la imagen no se envía</div>
+  <div class="legal">Herramienta académica de apoyo (MIA-203, UNI-FIIS, Grupo 6). No es un dispositivo médico ni reemplaza la lectura de un radiólogo.
+    Modelo: U-Net entrenada con máscaras automáticas de CheXmask sobre NIH ChestX-ray14. Ejemplos: NIH ChestX-ray14.</div>
+</footer>
 
 <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web@1.20.1/dist/ort.min.js"></script>
 <script>
@@ -110,19 +372,10 @@
 const S = 256, LADO_FOTO = 900;          // como src/fotos.py: la foto enderezada mide 900 px antes de reducirla
 const $ = id => document.getElementById(id);
 let sesion = null, imagenFuente = null, esquinas = [], medida = null, auto = null, vista = null;
+let entrada = null, editando = false, zoom = 1, inclinada = false;
+const datos = { proy: "PA" };
 
-ort.env.wasm.wasmPaths = "https://cdn.jsdelivr.net/npm/onnxruntime-web@1.20.1/dist/";
-ort.InferenceSession.create("modelo/unet.onnx", { executionProviders: ["wasm"] })
-  .then(s => {
-    sesion = s; estado("Modelo listo. Sube una radiografía o prueba un ejemplo.");
-    const ej = new URLSearchParams(location.search).get("ejemplo");   // ?ejemplo=con o ?ejemplo=sin abre directo
-    if (ej === "con" || ej === "sin") cargar(`ejemplos/${ej}_cardiomegalia.png`);
-  })
-  .catch(e => estado("No se pudo cargar el modelo: " + e.message + " (abre la app desde un servidor, no como archivo)."));
-
-function estado(t) { $("estado").textContent = t; }
-
-// ---------------------------------------------------------------- imagen -> gris
+// ================================================================ cálculo (sin cambios: verificado contra Python)
 function aGris(img, maxLado = 2400) {
   const f = Math.min(1, maxLado / Math.max(img.naturalWidth, img.naturalHeight));
   const w = Math.round(img.naturalWidth * f), h = Math.round(img.naturalHeight * f);
@@ -132,7 +385,6 @@ function aGris(img, maxLado = 2400) {
   for (let i = 0; i < w * h; i++) g[i] = 0.299 * d[4 * i] + 0.587 * d[4 * i + 1] + 0.114 * d[4 * i + 2];   // cv2 BGR2GRAY
   return { g, w, h };
 }
-
 // Reducción por área (como cv2.INTER_AREA al achicar): cada píxel de salida promedia el rectángulo que cubre.
 function pesos(n, m) {
   const s = n / m, out = [];
@@ -149,7 +401,6 @@ function reducir({ g, w, h }, m) {
   for (let y = 0; y < m; y++) for (let x = 0; x < m; x++) { let v = 0; for (const [i, p] of py[y]) v += p * tmp[i * m + x]; out[y * m + x] = Math.round(v); }
   return { g: out, w: m, h: m };
 }
-
 // Homografía del cuadrado destino a los 4 puntos tocados (8 incógnitas, eliminación de Gauss) y remuestreo bilineal.
 function homografia(dst, src) {
   const A = [], b = [];
@@ -169,8 +420,8 @@ function homografia(dst, src) {
   }
   return b.map((v, i) => v / A[i][i]);
 }
-function enderezar({ g, w, h }, pts) {
-  const N = LADO_FOTO, H = homografia([[0, 0], [N, 0], [N, N], [0, N]], pts), out = new Float32Array(N * N);
+function enderezar({ g, w, h }, pts, N = LADO_FOTO) {
+  const H = homografia([[0, 0], [N, 0], [N, N], [0, N]], pts), out = new Float32Array(N * N);
   for (let v = 0; v < N; v++) for (let u = 0; u < N; u++) {
     const z = H[6] * u + H[7] * v + 1, x = (H[0] * u + H[1] * v + H[2]) / z, y = (H[3] * u + H[4] * v + H[5]) / z;
     const x0 = Math.floor(x), y0 = Math.floor(y), fx = x - x0, fy = y - y0;
@@ -180,8 +431,6 @@ function enderezar({ g, w, h }, pts) {
   }
   return { g: out, w: N, h: N };
 }
-
-// ---------------------------------------------------------------- máscaras -> medida (igual que src/ctr.py)
 function mayorComponente(m) {
   const lab = new Int32Array(S * S); let mejor = 0, mejorN = 0, id = 0;
   for (let s = 0; s < S * S; s++) {
@@ -217,144 +466,421 @@ function medir([pd, pi, cor]) {
 function indices(m) {
   const id = m.tDer - m.tIzq, medio = (m.tDer + m.tIzq) / 2;
   const mrd = Math.max(0, medio - m.cIzq), mld = Math.max(0, m.cDer - medio);
-  return { ict: (mrd + mld) / id, mrd: mrd / id, mld: mld / id, medio };
+  return { ict: (mrd + mld) / id, mrd: mrd / id, mld: mld / id, medio, idPx: id, mrdPx: mrd, mldPx: mld };
 }
-
-// ---------------------------------------------------------------- flujo
-async function medirImagen(gris) {
-  if (!sesion) { estado("El modelo todavía se está cargando…"); return; }
-  estado("Midiendo…");
+async function segmentar(gris) {
   const r = reducir(gris, S), x = new Float32Array(S * S);
   for (let i = 0; i < S * S; i++) x[i] = (r.g[i] / 255 - 0.5) / 0.25;
-  const t0 = performance.now();
   const sal = await sesion.run({ imagen: new ort.Tensor("float32", x, [1, 1, S, S]) });
-  const p = sal.prob.data, masks = [0, 1, 2].map(c => {
+  const p = sal.prob.data;
+  const masks = [0, 1, 2].map(c => {
     const m = new Uint8Array(S * S); for (let i = 0; i < S * S; i++) m[i] = p[c * S * S + i] >= 0.5 ? 1 : 0;
     return mayorComponente(m);
   });
-  const ms = Math.round(performance.now() - t0);
-  vista = { gris: gris.w === gris.h && gris.w <= 1024 ? gris : reducir(gris, 768), masks };
-  auto = medir(masks);
-  medida = auto && { ...auto };
-  $("resultado").classList.remove("oculto");
-  dibujar();
-  estado(auto ? `Listo en ${ms} ms.` : "No se encontraron los dos pulmones y el corazón: no se puede medir esta imagen.");
+  return { masks, calidad: calidad(r.g, p) };
 }
 
-function dibujar() {
-  const c = $("lienzo"), N = 768, k = N / S, ctx = c.getContext("2d");
-  c.width = N; c.height = N;
-  const { gris, masks } = vista, img = ctx.createImageData(N, N), f = gris.w / N;
+// ================================================================ calidad de la imagen (como src/calidad.py)
+// Umbrales = percentil 1 o 99 de las 100 placas originales del NIH usadas en E5 (results/calidad/umbrales.json):
+// la imagen sale del rango que cubre al 99 % de las placas limpias. Solo AVISAN la incertidumbre de la red y las
+// estructuras cortadas: en las 300 fotos de E5 las señaladas por incertidumbre cambian de decisión en el 20 % frente
+// al 2,9 %; contraste, nitidez y exposición no predijeron más error (results/calidad/LEEME.md) y solo se informan.
+const UMBRALES = { contraste: 30.65, nitidez: 49.73, exposicion: 0.2801, incertidumbre: 0.1211, borde: 0.00083 };
+const AVISAN = ["incertidumbre", "borde"];
+const MOTIVOS = {
+  contraste: "contraste bajo", nitidez: "imagen borrosa", exposicion: "zonas quemadas o muy oscuras",
+  incertidumbre: "contornos dudosos", borde: "pulmones o corazón cortados por el borde",
+};
+function calidad(g, p) {
+  let suma = 0, suma2 = 0, extremos = 0;
+  for (let i = 0; i < S * S; i++) { const v = g[i]; suma += v; suma2 += v * v; if (v <= 5 || v >= 250) extremos++; }
+  const media = suma / (S * S), contraste = Math.sqrt(suma2 / (S * S) - media * media);
+  let ls = 0, ls2 = 0, n = 0;
+  for (let y = 1; y < S - 1; y++) for (let x = 1; x < S - 1; x++) {
+    const i = y * S + x, l = -4 * g[i] + g[i - S] + g[i + S] + g[i - 1] + g[i + 1];
+    ls += l; ls2 += l * l; n++;
+  }
+  const nitidez = ls2 / n - (ls / n) ** 2;
+  let dudosos = 0, estructura = 0, union = 0, enMarco = 0;
+  for (let c = 0; c < 3; c++) for (let i = 0; i < S * S; i++) {
+    const q = p[c * S * S + i]; if (q > 0.2 && q < 0.8) dudosos++; if (q >= 0.5) estructura++;
+  }
+  for (let i = 0; i < S * S; i++) {
+    if (p[i] >= 0.5 || p[S * S + i] >= 0.5 || p[2 * S * S + i] >= 0.5) {
+      union++; const y = (i / S) | 0, x = i % S; if (x === 0 || y === 0 || x === S - 1 || y === S - 1) enMarco++;
+    }
+  }
+  const v = { contraste, nitidez, exposicion: extremos / (S * S), incertidumbre: dudosos / Math.max(1, estructura),
+              borde: enMarco / Math.max(1, union) };
+  const fallas = [];
+  if (v.contraste < UMBRALES.contraste) fallas.push("contraste");
+  if (v.nitidez < UMBRALES.nitidez) fallas.push("nitidez");
+  if (v.exposicion > UMBRALES.exposicion) fallas.push("exposicion");
+  if (v.incertidumbre > UMBRALES.incertidumbre) fallas.push("incertidumbre");
+  if (v.borde > UMBRALES.borde) fallas.push("borde");
+  return { valores: v, fallas };
+}
+
+// ================================================================ modelo con progreso real de descarga
+(async () => {
+  try {
+    ort.env.wasm.wasmPaths = "https://cdn.jsdelivr.net/npm/onnxruntime-web@1.20.1/dist/";
+    const resp = await fetch("modelo/unet.onnx");
+    if (!resp.ok) throw new Error("HTTP " + resp.status);
+    const total = +resp.headers.get("content-length") || 31e6, partes = []; let n = 0;
+    const lector = resp.body.getReader();
+    for (;;) {
+      const { done, value } = await lector.read(); if (done) break;
+      partes.push(value); n += value.length; progreso(Math.min(99, Math.round(100 * n / total)));
+    }
+    const buf = new Uint8Array(n); let o = 0; for (const p of partes) { buf.set(p, o); o += p.length; }
+    sesion = await ort.InferenceSession.create(buf, { executionProviders: ["wasm"] });
+    progreso(100);
+    $("medir-carga").disabled = false;
+    const ej = new URLSearchParams(location.search).get("ejemplo");   // ?ejemplo=con o ?ejemplo=sin abre directo
+    if ((ej === "con" || ej === "sin") && !entrada) cargar(`ejemplos/${ej}_cardiomegalia.png`, false);
+    else if (entrada && !$("p-carga").classList.contains("oculto")) medirEntrada();
+  } catch (e) {
+    $("error-tit").textContent = "No se pudo preparar el modelo";
+    $("error-txt").textContent = "Abra la aplicación desde un servidor (no como archivo suelto) y con conexión la primera vez. Detalle: " + e.message;
+    if (entrada) mostrarPanel("error");
+  }
+})();
+function progreso(p) { $("prog").style.transform = `scaleX(${p / 100})`; $("prog-txt").textContent = p + " %"; }
+
+// ================================================================ vistas
+const PASOS = { esquinas: "02 · Marcar esquinas", medicion: "03 · Medición", carga: "05 · Carga del modelo", error: "06 · No medible" };
+function mostrarInicio() {
+  $("v-inicio").classList.remove("oculto"); $("v-estudio").classList.add("oculto");
+  $("paso").textContent = "01 · Inicio"; entrada = null; editando = false;
+}
+function mostrarPanel(nombre) {
+  $("v-inicio").classList.add("oculto"); $("v-estudio").classList.remove("oculto");
+  for (const p of ["medicion", "esquinas", "carga", "error"]) $("p-" + p).classList.toggle("oculto", p !== nombre);
+  if (nombre !== "medicion") $("aviso-visor").classList.add("oculto");   // el aviso es de la medida, no de la imagen nueva
+  $("paso").textContent = nombre === "medicion" ? (editada() ? "04 · Medición (corregida)" : "03 · Medición (automática)") : PASOS[nombre];
+  pieVisor(nombre);
+}
+function pieVisor(nombre) {
+  const pie = $("visor-pie");
+  if (nombre === "medicion") pie.innerHTML = `<span class="p">— Pulmones / ID</span><span class="c">— Corazón / MRD / MLD</span>
+    <span>${editando ? "Arrastre las asas para ajustar" : "Límites detectados · revise la medida"}</span>`;
+  else if (nombre === "esquinas") pie.textContent = "Toque cada esquina en orden. Use la lupa para afinar.";
+  else if (nombre === "carga") pie.textContent = "Imagen cargada · medición pendiente de preparación local";
+  else pie.textContent = "Sin límites válidos · revise la imagen de origen";
+}
+function resumen() {
+  const partes = [];
+  const hc = $("d-hc").value.trim(), ed = $("d-edad").value.trim(), sx = $("d-sexo").value;
+  if (hc) partes.push("HC " + hc);
+  if (ed) partes.push(/\D/.test(ed) ? ed : ed + " años");
+  if (sx) partes.push(sx);
+  partes.push(datos.proy);
+  $("resumen").innerHTML = partes.map(p => p.replace(/[&<>]/g, "")).join("<i>/</i>");
+  $("visor-tit").innerHTML = "TÓRAX FRONTAL &nbsp;/&nbsp; " + datos.proy;
+  $("lado-proy").textContent = datos.proy;
+  $("nota-proy").textContent = datos.proy === "PA"
+    ? "PA: proyección posteroanterior. Confirme la proyección antes de interpretar el índice."
+    : "AP: el corazón se ve más grande por la geometría de la toma; con el umbral de 0,50 el índice se sobreestima.";
+  if (medida) pintarPanel();
+}
+
+// ================================================================ entradas
+function cargar(src, esFoto) {
+  const img = new Image();
+  img.onload = () => {
+    imagenFuente = aGris(img); inclinada = false; medida = auto = vista = null; editando = false;
+    entrada = esFoto ? null : imagenFuente; esquinas = []; zoom = 1; $("caja").classList.remove("zoom");
+    if (esFoto) { mostrarPanel("esquinas"); pintarFoto(); return; }
+    medirEntrada();
+  };
+  img.onerror = () => { $("error-tit").textContent = "No se pudo abrir la imagen";
+    $("error-txt").textContent = "Use PNG o JPG. Si es una foto HEIC del iPhone: Ajustes > Cámara > Formatos > Más compatible.";
+    vista = null; mostrarPanel("error"); dibujarSoloImagen(null); };
+  img.src = src;
+}
+async function medirEntrada() {
+  if (!sesion) { mostrarPanel("carga"); dibujarSoloImagen(entrada); return; }
+  const { masks, calidad: cal } = await segmentar(entrada);
+  vista = { gris: entrada.w === entrada.h && entrada.w <= 1024 ? entrada : reducir(entrada, 768), masks, cal };
+  auto = medir(masks); medida = auto && { ...auto }; editando = false;
+  if (!auto) { $("error-tit").textContent = "Imagen no medible";
+    $("error-txt").textContent = "No se encontraron ambos pulmones y el corazón. Revise que la imagen sea una radiografía de tórax frontal completa.";
+    mostrarPanel("error"); dibujarSoloImagen(entrada); return; }
+  avisoVisor(); mostrarPanel("medicion"); dibujar();
+}
+function desdeArchivo(ev, foto) {
+  const f = ev.target.files[0]; ev.target.value = "";
+  if (f) cargar(URL.createObjectURL(f), foto || $("es-foto").checked);
+}
+$("archivo").addEventListener("change", ev => desdeArchivo(ev, false));
+$("camara").addEventListener("change", ev => desdeArchivo(ev, true));
+for (const l of document.querySelectorAll("label[for]")) l.addEventListener("keydown", ev => { if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); $(l.htmlFor).click(); } });
+$("ej-con").addEventListener("click", () => cargar("ejemplos/con_cardiomegalia.png", false));
+$("ej-sin").addEventListener("click", () => cargar("ejemplos/sin_cardiomegalia.png", false));
+const zona = $("zona");
+zona.addEventListener("dragover", ev => { ev.preventDefault(); zona.classList.add("encima"); });
+zona.addEventListener("dragleave", () => zona.classList.remove("encima"));
+zona.addEventListener("drop", ev => { ev.preventDefault(); zona.classList.remove("encima");
+  const f = ev.dataTransfer.files[0]; if (f && f.type.startsWith("image/")) cargar(URL.createObjectURL(f), $("es-foto").checked); });
+$("medir-carga").addEventListener("click", medirEntrada);
+$("reintentar").addEventListener("click", () => { if (entrada) medirEntrada(); else if (imagenFuente) { mostrarPanel("esquinas"); pintarFoto(); } else mostrarInicio(); });
+$("otra").addEventListener("click", mostrarInicio);
+$("nueva").addEventListener("click", mostrarInicio);
+
+// ================================================================ dibujo del visor
+const N = 768, K = N / S;
+function lienzoBase(gris) {
+  const c = $("lienzo"), ctx = c.getContext("2d");
+  c.width = N; c.height = N; c.style.width = c.style.height = zoom > 1 ? N * zoom * 0.75 + "px" : "";
+  ctx.fillStyle = "#000"; ctx.fillRect(0, 0, N, N);
+  if (!gris) return ctx;
+  const img = ctx.createImageData(N, N), f = gris.w / N;
   for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) {
     const v = gris.g[Math.min(gris.h - 1, (y * f) | 0) * gris.w + Math.min(gris.w - 1, (x * f) | 0)], i = 4 * (y * N + x);
     img.data[i] = img.data[i + 1] = img.data[i + 2] = v; img.data[i + 3] = 255;
   }
   ctx.putImageData(img, 0, 0);
-  const css = getComputedStyle(document.documentElement);
-  const colores = [css.getPropertyValue("--pulmon"), css.getPropertyValue("--pulmon"), css.getPropertyValue("--acento")];
-  masks.forEach((m, c) => {
-    ctx.fillStyle = colores[c].trim();
+  return ctx;
+}
+function dibujarSoloImagen(gris) { lienzoBase(gris && (gris.w === gris.h && gris.w <= 1024 ? gris : reducir(gris, 768))); }
+function etiqueta(ctx, txt, x, y, color) {
+  ctx.font = '500 15px "IBM Plex Mono", monospace';
+  const w = ctx.measureText(txt).width + 12;
+  ctx.fillStyle = "rgba(20,20,20,.86)"; ctx.fillRect(x - w / 2, y - 12, w, 22);
+  ctx.fillStyle = color; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText(txt, x, y);
+}
+function asa(ctx, x, y, color) {
+  ctx.fillStyle = "#141414"; ctx.strokeStyle = color; ctx.lineWidth = 2;
+  ctx.fillRect(x - 7, y - 7, 14, 14); ctx.strokeRect(x - 7, y - 7, 14, 14);
+}
+function dibujar() {
+  const ctx = lienzoBase(vista.gris), css = getComputedStyle(document.documentElement);
+  const cP = css.getPropertyValue("--pulmon").trim(), cC = css.getPropertyValue("--corazon").trim();
+  const capas = [$("c-pulmon").checked, $("c-pulmon").checked, $("c-corazon").checked];
+  vista.masks.forEach((m, c) => {
+    if (!capas[c]) return;
+    ctx.fillStyle = c < 2 ? cP : cC; ctx.globalAlpha = 0.95;
     for (let y = 1; y < S - 1; y++) for (let x = 1; x < S - 1; x++) {
       const i = y * S + x;
-      if (m[i] && (!m[i - 1] || !m[i + 1] || !m[i - S] || !m[i + S])) ctx.fillRect(x * k, y * k, k, k);
+      if (m[i] && (!m[i - 1] || !m[i + 1] || !m[i - S] || !m[i + S])) ctx.fillRect(x * K + 0.5, y * K + 0.5, K - 1, K - 1);
     }
   });
-  if (!medida) { pintarResultado(null); return; }
-  const r = indices(medida), yF = (medida.fila + 0.5) * k;
-  ctx.lineWidth = 2;
-  const vertical = (x, color, guion) => {
-    ctx.strokeStyle = color; ctx.setLineDash(guion ? [8, 6] : []);
-    ctx.beginPath(); ctx.moveTo((x + 0.5) * k, 0); ctx.lineTo((x + 0.5) * k, N); ctx.stroke();
-  };
-  vertical(medida.tIzq, "#ffd54a"); vertical(medida.tDer, "#ffd54a");
-  vertical(medida.cIzq, "#ff8a80"); vertical(medida.cDer, "#ff8a80");
-  vertical(r.medio, "#ffffff", true);
-  ctx.setLineDash([]); ctx.strokeStyle = "#ffd54a";
-  ctx.beginPath(); ctx.moveTo((medida.tIzq + 0.5) * k, yF); ctx.lineTo((medida.tDer + 0.5) * k, yF); ctx.stroke();
-  pintarResultado(r);
+  ctx.globalAlpha = 1;
+  if (!medida || !$("c-medidas").checked) { pintarPanel(); return; }
+  const r = indices(medida), X = v => (v + 0.5) * K, yF = X(medida.fila);
+  const yC = alturaCorazon(), xM = X(r.medio);
+  // línea media
+  ctx.strokeStyle = "rgba(255,255,255,.75)"; ctx.lineWidth = 1.5; ctx.setLineDash([6, 6]);
+  ctx.beginPath(); ctx.moveTo(xM, 0); ctx.lineTo(xM, N); ctx.stroke(); ctx.setLineDash([]);
+  // ID: fila más ancha entre los bordes externos de los pulmones
+  ctx.strokeStyle = cP; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.moveTo(X(medida.tIzq), yF); ctx.lineTo(X(medida.tDer), yF); ctx.stroke();
+  for (const x of [X(medida.tIzq), X(medida.tDer)]) { ctx.beginPath(); ctx.moveTo(x, yF - 10); ctx.lineTo(x, yF + 10); ctx.stroke(); }
+  // bordes del corazón y distancias a la línea media
+  ctx.strokeStyle = cC;
+  for (const x of [X(medida.cIzq), X(medida.cDer)]) { ctx.beginPath(); ctx.moveTo(x, yC.a); ctx.lineTo(x, yC.b); ctx.stroke(); }
+  ctx.beginPath(); ctx.moveTo(X(medida.cIzq), yC.m); ctx.lineTo(X(medida.cDer), yC.m); ctx.stroke();
+  etiqueta(ctx, "Línea media", xM, 26, "#e6e6e6");
+  etiqueta(ctx, "MRD", (X(medida.cIzq) + xM) / 2, yC.m - 22, cC);
+  etiqueta(ctx, "MLD", (X(medida.cDer) + xM) / 2, yC.m - 22, cC);
+  etiqueta(ctx, `ID ${fmtPx(r.idPx)}`, (X(medida.tIzq) + X(medida.tDer)) / 2, yF + 26, cP);
+  if (editando) {
+    asa(ctx, X(medida.tIzq), yF, cP); asa(ctx, X(medida.tDer), yF, cP);
+    asa(ctx, X(medida.cIzq), yC.m, cC); asa(ctx, X(medida.cDer), yC.m, cC);
+  }
+  pintarPanel();
+}
+function alturaCorazon() {
+  const cor = vista.masks[2]; let a = S, b = -1;
+  for (let i = 0; i < S * S; i++) if (cor[i]) { const y = (i / S) | 0; if (y < a) a = y; if (y > b) b = y; }
+  const X = v => (v + 0.5) * K;
+  return { a: X(a) - 6, b: X(b) + 6, m: X((a + b) / 2) };
 }
 
-function pintarResultado(r) {
-  const fmt = v => v.toFixed(2).replace(".", ",");
-  if (!r) { $("ict").textContent = "–"; $("veredicto").textContent = "Sin medida"; return; }
+// ================================================================ panel de resultado
+const fmt = v => v.toFixed(2).replace(".", ",");
+const fmtPx = v => (Number.isInteger(v) ? v : v.toFixed(1).replace(".", ",")) + " px";
+function editada() { return !!(auto && medida && ["tIzq", "tDer", "cIzq", "cDer"].some(k => medida[k] !== auto[k])); }
+function pintarPanel() {
+  if (!medida) return;
+  const r = indices(medida), ed = editada();
   $("ict").textContent = fmt(r.ict);
-  $("mrd").textContent = fmt(r.mrd); $("mld").textContent = fmt(r.mld);
-  const pos = Math.max(0, Math.min(1, (r.ict - 0.3) / 0.4));
-  $("marcador").style.left = `calc(${pos * 100}% - 2px)`;
-  const v = $("veredicto");
-  v.textContent = r.ict > 0.5 ? "Por encima de 0,50: compatible con cardiomegalia" : "Hasta 0,50: dentro de lo habitual";
-  v.style.color = r.ict > 0.5 ? "var(--acento)" : "var(--ok)";
-  const editada = auto && ["tIzq", "tDer", "cIzq", "cDer"].some(k => medida[k] !== auto[k]);
-  $("origen").textContent = editada ? "corregida a mano" : "automática";
-  $("restaurar").disabled = !editada;
+  $("lado-id").textContent = "ID " + fmtPx(r.idPx);
+  const alta = r.ict > 0.5, lec = $("lectura");
+  lec.className = "lectura " + (alta ? "alta" : "normal");
+  lec.textContent = r.ict > 1 ? "Medida no válida: revise los bordes o use otra imagen"
+    : alta ? "Por encima de 0,50: compatible con cardiomegalia" : "Hasta 0,50: dentro de lo habitual";
+  avisoVisor();
+  $("origen").textContent = ed ? "Corregida por el médico" : "Automática";
+  $("restaurar").classList.toggle("oculto", !ed);
+  const d = r.ict - indices(auto).ict;
+  $("delta").classList.toggle("oculto", !ed);
+  $("delta").textContent = `${d >= 0 ? "+" : "−"}${fmt(Math.abs(d))} respecto a la automática`;
+  const pos = v => Math.max(0, Math.min(1, (v - 0.35) / 0.35)) * 100;
+  $("umbral").style.left = pos(0.5) + "%"; $("riel-alto").style.left = pos(0.5) + "%";
+  $("valor").style.left = pos(r.ict) + "%"; $("valor-txt").textContent = fmt(r.ict);
+  $("v-mrd").textContent = fmtPx(r.mrdPx); $("v-mld").textContent = fmtPx(r.mldPx); $("v-id").textContent = fmtPx(r.idPx);
+  $("informe").textContent = textoInforme(r, ed);
+  $("corregir").textContent = editando ? "Finalizar ajuste" : "Corregir bordes";
+  if (!$("p-medicion").classList.contains("oculto")) {
+    $("paso").textContent = ed ? "04 · Medición (corregida)" : "03 · Medición (automática)"; pieVisor("medicion");
+  }
+}
+function textoInforme(r, ed) {
+  return `ICT ${fmt(r.ict)} (MRD ${fmtPx(r.mrdPx)}, MLD ${fmtPx(r.mldPx)}, ID ${fmtPx(r.idPx)}; imagen de 256 px), ` +
+    `${datos.proy}, medida ${ed ? "corregida manualmente" : "automática"}` +
+    (motivosCalidad().length ? `, imagen de baja calidad (${motivosCalidad().join(", ")})` : "") +
+    `. Valor de apoyo; no reemplaza la lectura radiológica.`;
+}
+$("restaurar").addEventListener("click", () => { medida = { ...auto }; dibujar(); });
+$("corregir").addEventListener("click", () => { editando = !editando; dibujar(); });
+$("copiar").addEventListener("click", async () => {
+  const t = $("informe").textContent, b = $("copiar").querySelector("span");
+  try { await navigator.clipboard.writeText(t); b.textContent = "Copiado"; }
+  catch { const s = getSelection(), rg = document.createRange(); rg.selectNodeContents($("informe")); s.removeAllRanges(); s.addRange(rg); b.textContent = "Texto seleccionado"; }
+  setTimeout(() => { b.textContent = "Copiar al informe"; }, 1800);
+});
+for (const id of ["c-pulmon", "c-corazon", "c-medidas"]) $(id).addEventListener("change", dibujar);
+function motivosCalidad() {
+  const m = (vista && vista.cal ? vista.cal.fallas : []).filter(f => AVISAN.includes(f)).map(f => MOTIVOS[f]);
+  if (inclinada) m.unshift("foto muy inclinada");
+  if (medida && indices(medida).ict > 1) m.unshift("medida imposible: el corazón sale más ancho que el tórax");
+  return m;
+}
+function avisoVisor() {
+  const a = $("aviso-visor"), m = motivosCalidad();
+  a.classList.toggle("oculto", !m.length);
+  const txt = m.join(", ");
+  a.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3l10 18H2z"/><path d="M12 10v5M12 18v.5"/></svg>
+    <span>Imagen de baja calidad: ${txt}. Revise los bordes antes de usar la medida.</span>`;
+  $("calidad").innerHTML = m.length
+    ? `<b style="color:var(--ambar-txt)">Revisar</b> · ${txt}`
+    : `<b style="color:var(--verde-txt)">Adecuada</b> · dentro del rango de las placas de referencia`;
 }
 
-// ---------------------------------------------------------------- arrastrar las líneas
+// ================================================================ arrastrar las asas (modo "Corregir bordes")
 let arrastre = null;
-function aMascara(ev) {
+function aLienzo(ev) {
   const b = $("lienzo").getBoundingClientRect();
-  return (ev.clientX - b.left) / b.width * S - 0.5;
+  return [(ev.clientX - b.left) / b.width * N, (ev.clientY - b.top) / b.height * N];
 }
 $("lienzo").addEventListener("pointerdown", ev => {
-  if (!medida) return;
-  const x = aMascara(ev), tol = 4 * S / $("lienzo").getBoundingClientRect().width * 4;
+  if (!medida || !editando || !$("c-medidas").checked) return;
+  const [x, y] = aLienzo(ev), b = $("lienzo").getBoundingClientRect(), tol = 24 * N / b.width;
+  const X = v => (v + 0.5) * K, yF = X(medida.fila), yC = alturaCorazon().m;
+  const asas = { tIzq: [X(medida.tIzq), yF], tDer: [X(medida.tDer), yF], cIzq: [X(medida.cIzq), yC], cDer: [X(medida.cDer), yC] };
   let mejor = null, d = tol;
-  for (const k of ["tIzq", "tDer", "cIzq", "cDer"]) if (Math.abs(medida[k] - x) < d) { d = Math.abs(medida[k] - x); mejor = k; }
-  if (mejor) { arrastre = mejor; $("lienzo").setPointerCapture(ev.pointerId); }
+  for (const [k, [ax, ay]] of Object.entries(asas)) { const dd = Math.hypot(ax - x, ay - y); if (dd < d) { d = dd; mejor = k; } }
+  if (mejor) { arrastre = mejor; $("lienzo").setPointerCapture(ev.pointerId); ev.preventDefault(); }
 });
 $("lienzo").addEventListener("pointermove", ev => {
   if (!arrastre) return;
-  medida[arrastre] = Math.max(0, Math.min(S - 1, Math.round(aMascara(ev))));
+  medida[arrastre] = Math.max(0, Math.min(S - 1, Math.round(aLienzo(ev)[0] / K - 0.5)));
   if (medida.tDer <= medida.tIzq) medida.tDer = medida.tIzq + 1;
   dibujar();
 });
 $("lienzo").addEventListener("pointerup", () => { arrastre = null; });
-$("restaurar").addEventListener("click", () => { medida = { ...auto }; dibujar(); });
-
-// ---------------------------------------------------------------- entradas
-function cargar(src) {
-  const img = new Image();
-  img.onload = () => {
-    imagenFuente = aGris(img);
-    if ($("esquinas").checked) { esquinas = []; mostrarFoto(); }
-    else { $("paso-esquinas").classList.add("oculto"); medirImagen(imagenFuente); }
-  };
-  img.onerror = () => estado("No se pudo abrir la imagen (si es HEIC, usa JPG: Ajustes > Cámara > Formatos > Más compatible).");
-  img.src = src;
+$("ajustar").addEventListener("click", () => { zoom = 1; $("caja").classList.remove("zoom"); $("zoom").classList.remove("activo"); redibujar(); });
+$("zoom").addEventListener("click", () => { zoom = zoom > 1 ? 1 : 2; $("caja").classList.toggle("zoom", zoom > 1); $("zoom").classList.toggle("activo", zoom > 1); redibujar(); });
+$("pantalla").addEventListener("click", () => { if (document.fullscreenElement) document.exitFullscreen(); else $("visor").requestFullscreen?.(); });
+function redibujar() {
+  if (!$("p-medicion").classList.contains("oculto") && vista) dibujar();
+  else if (!$("p-esquinas").classList.contains("oculto")) pintarFoto();
+  else dibujarSoloImagen(entrada);
 }
-function desdeArchivo(ev) { const f = ev.target.files[0]; if (f) cargar(URL.createObjectURL(f)); ev.target.value = ""; }
-$("archivo").addEventListener("change", desdeArchivo);
-$("camara").addEventListener("change", desdeArchivo);
-$("ej-con").addEventListener("click", () => { $("esquinas").checked = false; cargar("ejemplos/con_cardiomegalia.png"); });
-$("ej-sin").addEventListener("click", () => { $("esquinas").checked = false; cargar("ejemplos/sin_cardiomegalia.png"); });
 
-function mostrarFoto() {
-  $("paso-esquinas").classList.remove("oculto"); $("resultado").classList.add("oculto");
-  const { g, w, h } = imagenFuente, c = $("lienzo-foto"), f = Math.min(1, 1200 / Math.max(w, h));
-  c.width = Math.round(w * f); c.height = Math.round(h * f);
+// ================================================================ esquinas de una foto
+const NOMBRES = ["Superior izquierda", "Superior derecha", "Inferior derecha", "Inferior izquierda"];
+let escalaFoto = 1;
+function pintarFoto() {
+  const { g, w, h } = imagenFuente, c = $("lienzo"), f = Math.min(1, 1200 / Math.max(w, h));
+  escalaFoto = f; c.width = Math.round(w * f); c.height = Math.round(h * f); c.style.width = c.style.height = "";
   const ctx = c.getContext("2d"), img = ctx.createImageData(c.width, c.height);
   for (let y = 0; y < c.height; y++) for (let x = 0; x < c.width; x++) {
     const v = g[Math.min(h - 1, (y / f) | 0) * w + Math.min(w - 1, (x / f) | 0)], i = 4 * (y * c.width + x);
     img.data[i] = img.data[i + 1] = img.data[i + 2] = v; img.data[i + 3] = 255;
   }
   ctx.putImageData(img, 0, 0);
-  ctx.fillStyle = "#ffd54a"; ctx.strokeStyle = "#ffd54a"; ctx.lineWidth = 3;
+  const azul = "#8fb6dc";
+  ctx.strokeStyle = azul; ctx.lineWidth = 2 * c.width / Math.max(1, c.getBoundingClientRect().width);
+  if (esquinas.length > 1) { ctx.beginPath(); esquinas.forEach(([x, y], i) => i ? ctx.lineTo(x * f, y * f) : ctx.moveTo(x * f, y * f));
+    if (esquinas.length === 4) ctx.closePath(); ctx.stroke(); }
   esquinas.forEach(([x, y], i) => {
-    ctx.beginPath(); ctx.arc(x * f, y * f, 10, 0, 7); ctx.fill();
-    if (i) { ctx.beginPath(); ctx.moveTo(esquinas[i - 1][0] * f, esquinas[i - 1][1] * f); ctx.lineTo(x * f, y * f); ctx.stroke(); }
+    const s = 28 * c.width / Math.max(1, c.getBoundingClientRect().width);   // ~28 px en pantalla
+    ctx.fillStyle = "#1b1b1b"; ctx.fillRect(x * f - s / 2, y * f - s / 2, s, s);
+    ctx.strokeStyle = azul; ctx.strokeRect(x * f - s / 2, y * f - s / 2, s, s);
+    ctx.fillStyle = "#ececec"; ctx.font = `500 ${Math.round(s * 0.6)}px "IBM Plex Mono", monospace`;
+    ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText(String(i + 1), x * f, y * f + 1);
   });
-  if (esquinas.length === 4) { ctx.beginPath(); ctx.moveTo(esquinas[3][0] * f, esquinas[3][1] * f); ctx.lineTo(esquinas[0][0] * f, esquinas[0][1] * f); ctx.stroke(); }
+  $("pasos").innerHTML = NOMBRES.map((n, i) =>
+    `<li class="${i < esquinas.length ? "hecho" : i === esquinas.length ? "activo" : ""}"><span>${i + 1}</span><span>${n}${i === esquinas.length ? " · activa" : ""}</span></li>`).join("");
+  $("previa-n").textContent = `${esquinas.length} de 4 esquinas marcadas`;
   $("medir-foto").disabled = esquinas.length !== 4;
-  estado(esquinas.length < 4 ? `Esquina ${esquinas.length + 1} de 4.` : "Listo: pulsa Medir.");
+  const pv = $("previa").getContext("2d"); pv.fillStyle = "#000"; pv.fillRect(0, 0, 104, 104);
+  if (esquinas.length === 4) {
+    const e = enderezar(imagenFuente, esquinas, 104), im = pv.createImageData(104, 104);
+    for (let i = 0; i < 104 * 104; i++) { im.data[4 * i] = im.data[4 * i + 1] = im.data[4 * i + 2] = e.g[i]; im.data[4 * i + 3] = 255; }
+    pv.putImageData(im, 0, 0);
+  }
 }
-$("lienzo-foto").addEventListener("pointerdown", ev => {
-  if (esquinas.length >= 4) return;
-  const b = $("lienzo-foto").getBoundingClientRect();
-  esquinas.push([(ev.clientX - b.left) / b.width * imagenFuente.w, (ev.clientY - b.top) / b.height * imagenFuente.h]);
-  mostrarFoto();
+function aFoto(ev) {
+  const b = $("lienzo").getBoundingClientRect();
+  return [(ev.clientX - b.left) / b.width * imagenFuente.w, (ev.clientY - b.top) / b.height * imagenFuente.h];
+}
+function lupa(ev) {
+  if ($("p-esquinas").classList.contains("oculto") || esquinas.length >= 4) { $("lupa").classList.add("oculto"); return; }
+  const [x, y] = aFoto(ev), L = $("lupa"), c = $("lupa-c").getContext("2d"), r = 22;   // ×3: 44 px de la foto en 132 px
+  const { g, w, h } = imagenFuente, im = c.createImageData(132, 132);
+  for (let v = 0; v < 132; v++) for (let u = 0; u < 132; u++) {
+    const sx = Math.round(x - r + u / 3), sy = Math.round(y - r + v / 3), i = 4 * (v * 132 + u);
+    const val = sx >= 0 && sy >= 0 && sx < w && sy < h ? g[sy * w + sx] : 0;
+    im.data[i] = im.data[i + 1] = im.data[i + 2] = val; im.data[i + 3] = 255;
+  }
+  c.putImageData(im, 0, 0);
+  c.strokeStyle = "#8fb6dc"; c.beginPath(); c.moveTo(66, 54); c.lineTo(66, 78); c.moveTo(54, 66); c.lineTo(78, 66); c.stroke();
+  $("lupa-txt").textContent = `${esquinas.length + 1} · lupa ×3`;
+  L.style.left = ev.clientX + 24 + "px"; L.style.top = ev.clientY - 156 + "px"; L.classList.remove("oculto");
+}
+$("lienzo").addEventListener("pointermove", ev => { if (!$("p-esquinas").classList.contains("oculto")) lupa(ev); });
+$("lienzo").addEventListener("pointerleave", () => $("lupa").classList.add("oculto"));
+$("lienzo").addEventListener("click", ev => {
+  if ($("p-esquinas").classList.contains("oculto") || esquinas.length >= 4) return;
+  esquinas.push(aFoto(ev)); pintarFoto(); lupa(ev);
 });
-$("borrar-esquinas").addEventListener("click", () => { esquinas = []; mostrarFoto(); });
-$("medir-foto").addEventListener("click", () => medirImagen(enderezar(imagenFuente, esquinas)));
+$("borrar-esquinas").addEventListener("click", () => { esquinas = []; pintarFoto(); });
+$("medir-foto").addEventListener("click", () => {
+  // Inclinación como en E5: razón entre el lado mayor y el menor del cuadrilátero marcado.
+  const lados = [0, 1, 2, 3].map(i => Math.hypot(esquinas[(i + 1) % 4][0] - esquinas[i][0], esquinas[(i + 1) % 4][1] - esquinas[i][1]));
+  const razon = Math.max(lados[0] / lados[2], lados[2] / lados[0], lados[1] / lados[3], lados[3] / lados[1]);
+  entrada = enderezar(imagenFuente, esquinas); inclinada = razon > 1.15;
+  medirEntrada();
+});
+
+// ================================================================ encabezado, tema y datos opcionales
+function guardar(k, v) { try { localStorage.setItem(k, v); } catch {} }
+function leer(k) { try { return localStorage.getItem(k); } catch { return null; } }
+function tema(t) {
+  document.documentElement.dataset.theme = t; guardar("ict-tema", t);
+  $("t-oscuro").setAttribute("aria-pressed", t === "oscuro"); $("t-claro").setAttribute("aria-pressed", t === "claro");
+  if (vista && !$("p-medicion").classList.contains("oculto")) dibujar();
+}
+$("t-oscuro").addEventListener("click", () => tema("oscuro"));
+$("t-claro").addEventListener("click", () => tema("claro"));
+tema(leer("ict-tema") || "oscuro");
+const estab = $("estab"); if (leer("ict-estab")) estab.textContent = leer("ict-estab");
+$("editar-estab").addEventListener("click", () => {
+  const on = estab.getAttribute("contenteditable") === "true";
+  estab.setAttribute("contenteditable", on ? "false" : "true");
+  $("editar-estab").querySelector("span").textContent = on ? "Editar" : "Listo";
+  if (on) guardar("ict-estab", estab.textContent.trim()); else { estab.focus(); getSelection().selectAllChildren(estab); }
+});
+estab.addEventListener("keydown", ev => { if (ev.key === "Enter") { ev.preventDefault(); $("editar-estab").click(); } });
+function proyeccion(p) { datos.proy = p; $("p-pa").setAttribute("aria-pressed", p === "PA"); $("p-ap").setAttribute("aria-pressed", p === "AP"); resumen(); }
+$("p-pa").addEventListener("click", () => proyeccion("PA"));
+$("p-ap").addEventListener("click", () => proyeccion("AP"));
+for (const id of ["d-hc", "d-edad", "d-sexo", "d-fecha"]) $(id).addEventListener("input", resumen);
+resumen();
 </script>
 </body>
 </html>

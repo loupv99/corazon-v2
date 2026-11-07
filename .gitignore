@@ -20,3 +20,6 @@ slides/*.snm
 slides/*.toc
 slides/*.vrb
 paper/nuevo.*
+
+# configuración local del verificador de diseño
+app/.impeccable/
