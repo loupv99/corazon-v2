@@ -10,7 +10,9 @@ Telesalud; citas literales en `../CONTEXTO-Y-ANTECEDENTES.md`, §3). No queda te
 el equipo:
 - La tabla de Contribuciones y la declaración de uso de IA. **Ambas son obligatorias** según el enunciado (sin
   Contribuciones, el artículo se considera incompleto en el criterio 6).
-- El enlace a los pesos (línea en blanco tras «Pesos:»).
+
+Enlace a los pesos: completado el 2026-11-07, en la sección «Disponibilidad de código». Lleva al Release
+`v1.0-pesos` (15 `.pt` + `SHA256SUMS.txt`).
 - Título: provisional el candidato 1; se elige al final entre los 3 (comentario al inicio de `main.tex`).
 
 **Referencias comprobadas (2026-11-06):** las 17 académicas, contra Crossref (DOI), arXiv, PMLR y OpenAlex: título,

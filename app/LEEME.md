@@ -55,6 +55,9 @@ reducción a 256 px).
 
 **Modelo:** `modelo/unet.onnx` (31 MB) = U-Net E1b semilla 1, elegida por Dice de validación (0,9596), no por el test.
 Se regenera con `python -m src.exportar_onnx --ckpt runs/E1b_debil_rca07_s1/best.pt --out app/modelo/unet.onnx`.
+El `best.pt` está publicado como `E1b_debil_rca07_s1.pt` en el Release
+https://github.com/loupv99/corazon-v2/releases/tag/v1.0-pesos (verificado 2026-11-07: con la misma entrada, la
+sigmoide de PyTorch y el ONNX difieren como máximo 1,3·10⁻⁷).
 
 **En línea:** https://loupv99.github.io/corazon-v2/ (GitHub Pages, rama `gh-pages` = el contenido de `app/` en la raíz
 más `.nojekyll`; verificada el 2026-11-06: el ejemplo «con» da 0,52). Si cambia `app/`, hay que actualizar

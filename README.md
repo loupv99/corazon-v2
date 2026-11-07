@@ -4,6 +4,18 @@ Proyecto final de MIA-203 Redes Neuronales y Aprendizaje Profundo (UNI FIIS, 202
 
 **App en línea:** https://loupv99.github.io/corazon-v2/ (rama `gh-pages`; la imagen no sale del dispositivo).
 
+**Pesos de PyTorch:** https://github.com/loupv99/corazon-v2/releases/tag/v1.0-pesos. Son las 15 corridas del
+artículo (U-Net E1a, E1b y E1c; ResNet-50 E2 y E4; semillas 0, 1 y 2) con `SHA256SUMS.txt`. Los mejores modelos son la
+U-Net `E1b_debil_rca07_s1.pt` (Dice de validación 0,9596; la de la app) y la ResNet-50 `E2_resnet_paap_s0.pt` (la de la
+figura de Grad-CAM). Cada archivo trae `model` (state_dict), `args` y `epoch`:
+
+```python
+ck = torch.load("E1b_debil_rca07_s1.pt", map_location="cpu")
+unet = UNet(in_ch=1, n_out=3, base=32, depth=4); unet.load_state_dict(ck["model"])          # src/unet.py
+ck = torch.load("E2_resnet_paap_s0.pt", map_location="cpu")
+resnet = build_model("resnet50", pretrained=False); resnet.load_state_dict(ck["model"])     # src/classifier.py
+```
+
 Una U-Net segmenta pulmones y corazón en la radiografía de tórax y, con esos contornos, se calcula el índice
 cardiotorácico (ICT). Se compara con una CNN de caja negra (ResNet-50) para detectar cardiomegalia, usando etiquetas
 débiles (CheXmask) y doradas (SCR), y se mide la robustez a la proyección AP y a fotos tomadas con celular.
@@ -12,7 +24,7 @@ débiles (CheXmask) y doradas (SCR), y se mide la robustez a la proyección AP y
 corrido (notebook 02, [results/kaggle-v2/](results/kaggle-v2/LEEME.md)): E1–E4 con 3 semillas. E5 (fotos con celular):
 300 fotos de 100 placas con 2 celulares ([results/e5/](results/e5/LEEME.md)). E6 ([results/e6/](results/e6/LEEME.md))
 y app web ([app/](app/LEEME.md)) listos (2026-11-04). Paper ([paper/](paper/LEEME.md), 6 p.) y diapositivas
-([slides/](slides/GUION.md), 23) redactados; faltan contribuciones, declaración de IA, enlace a los pesos y notebook
+([slides/](slides/GUION.md), 23) redactados; pesos publicados (2026-11-07); faltan contribuciones, declaración de IA y notebook
 de demostración en Colab.
 
 ## Estructura

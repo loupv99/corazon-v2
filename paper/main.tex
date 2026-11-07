@@ -530,9 +530,12 @@ Lourdes Pedraza Palomino & \\
 
 \section*{Disponibilidad de código y uso de herramientas de IA}
 
-% Enlace a los pesos y declaración de uso de asistentes de IA: los completa el equipo.
+% Declaración de uso de asistentes de IA: la completa el equipo.
 Código y resultados: \url{https://github.com/loupv99/corazon-v2}. Aplicación:
-\url{https://loupv99.github.io/corazon-v2/}. Pesos: \rule{0.35\linewidth}{0.4pt}.
+\url{https://loupv99.github.io/corazon-v2/}. Pesos de PyTorch de las 15 corridas (U-Net E1a, E1b y E1c; ResNet-50 E2
+y E4; semillas 0, 1 y 2) con su SHA-256: \url{https://github.com/loupv99/corazon-v2/releases/tag/v1.0-pesos}. El
+mejor modelo de segmentación es la U-Net E1b de semilla 1, elegida por Dice de validación (0.9596), que es la que usa
+la aplicación.
 
 \bibliographystyle{IEEEtran}
 \bibliography{refs}
